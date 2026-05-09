@@ -44,7 +44,7 @@ namespace ivantsova {
     ~Vector();
     explicit Vector(size_t size);
     Vector(size_t size, const T& value);
-  
+
     Vector(const Vector< T >& rhs);
     Vector(Vector< T >&& rhs) noexcept;
 
@@ -76,11 +76,11 @@ namespace ivantsova {
     CIterator< T > end() const;
     CIterator< T > cbegin() const;
     CIterator< T > cend() const;
-    
+
     Iterator< T > insert(Iterator< T > pos, const T& value);
     Iterator< T > insert(Iterator< T > pos, CIterator< T > beg, CIterator< T > end);
     Iterator< T > insert(Iterator< T > pos, size_t count, const T& value);
-    
+
     Iterator< T > erase(Iterator< T > pos);
     Iterator< T > erase(Iterator< T > beg, Iterator< T > end);
     Iterator< T > erase(CIterator< T > beg, CIterator< T > end);
@@ -152,7 +152,7 @@ ivantsova::Vector< T >& ivantsova::Vector< T >::operator=(Vector< T >&& rhs) noe
   return *this;
 }
 
-template< class T > 
+template< class T >
 T& ivantsova::Vector< T >::operator[](size_t id) noexcept {
   return const_cast< T& >((*static_cast< const Vector< T >* >(this))[id]);
 }
