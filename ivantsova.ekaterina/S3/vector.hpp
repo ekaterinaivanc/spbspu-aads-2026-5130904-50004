@@ -48,11 +48,11 @@ namespace ivantsova {
     Vector(const Vector< T >& rhs);
     Vector(Vector< T >&& rhs) noexcept;
 
-    Vector< T >& operator=(const Vector< T >& rhs); 
-    Vector< T >& operator=(Vector< T >&& rhs) noexcept; 
+    Vector< T >& operator=(const Vector< T >& rhs);
+    Vector< T >& operator=(Vector< T >&& rhs) noexcept;
 
-    T& operator[](size_t id) noexcept; 
-    const T& operator[](size_t id) const noexcept; 
+    T& operator[](size_t id) noexcept;
+    const T& operator[](size_t id) const noexcept;
 
     bool isEmpty() const noexcept;
     size_t getSize() const noexcept;
@@ -61,9 +61,9 @@ namespace ivantsova {
     void popBack();
     void pushFront(const T& v);
 
-    void swap(Vector< T >& rhs) noexcept; 
-    T& at(size_t id); 
-    const T& at(size_t id) const; 
+    void swap(Vector< T >& rhs) noexcept;
+    T& at(size_t id);
+    const T& at(size_t id) const;
 
     void insert(size_t id, const T& t);
     void insert(size_t id, const Vector< T >& rhs, size_t beg, size_t end);
@@ -135,7 +135,7 @@ ivantsova::Vector< T >::Vector(Vector< T >&& rhs) noexcept:
     swap(rhs);
   }
 
-template< class T > 
+template< class T >
 ivantsova::Vector< T >& ivantsova::Vector< T >::operator=(const Vector< T >& rhs) {
   if (this == std::addressof(rhs)) {
     return *this;
@@ -157,7 +157,7 @@ T& ivantsova::Vector< T >::operator[](size_t id) noexcept {
   return const_cast< T& >((*static_cast< const Vector< T >* >(this))[id]);
 }
 
-template< class T > 
+template< class T >
 const T& ivantsova::Vector< T >::operator[](size_t id) const noexcept {
   return data_[id];
 }
