@@ -1,11 +1,11 @@
 #ifndef LIST_HPP
 #define LIST_HPP
 
-#include "list.hpp"
 #include <cstddef>
 #include <stdexcept>
 #include <utility>
 #include <limits>
+#include <memory>
 
 namespace ivantsova
 {
@@ -16,7 +16,10 @@ namespace ivantsova
     friend class List< T >;
 
   public:
-    LIter() noexcept : ptr(nullptr), head(nullptr) {}
+    LIter() noexcept:
+     ptr(nullptr),
+     head(nullptr)
+    {}
     LIter(const LIter&) noexcept = default;
     LIter(LIter&&) noexcept = default;
     ~LIter() = default;
@@ -30,7 +33,7 @@ namespace ivantsova
 
     T* operator->() const noexcept
     {
-      return &(ptr->data);
+      return std::addressof(ptr->data);
     }
 
     LIter& operator++() noexcept
@@ -55,7 +58,7 @@ namespace ivantsova
       }
       else
       {
-        ptr = ptr->head;
+        ptr = ptr->prev;
       }
       return *this;
     }
@@ -71,9 +74,12 @@ namespace ivantsova
     }
 
   private:
-    typename List<T>::Node* ptr;
-    typename List<T>::Node* head;
-    explicit LIter(typename List<T>::Node* p, typename List<T>::Node* h) noexcept : ptr(p), head(h) {}
+    typename List< T >::Node* ptr;
+    typename List< T >::Node* head;
+    explicit LIter(typename List< T >::Node* p, typename List< T >::Node* h) noexcept :
+      ptr(p),
+      head(h)
+    {}
   };
 
   template< class T > class LCIter
@@ -81,7 +87,10 @@ namespace ivantsova
     friend class ivantsova::List< T >;
 
   public:
-    LCIter() noexcept : ptr(nullptr), head(nullptr) {}
+    LCIter() noexcept:
+     ptr(nullptr),
+     head(nullptr)
+    {}
     LCIter(const LCIter&) noexcept = default;
     LCIter(LCIter&&) noexcept = default;
     ~LCIter() = default;
@@ -95,7 +104,7 @@ namespace ivantsova
 
     const T* operator->() const noexcept
     {
-      return &(ptr->data);
+      return std::addressof(ptr->data);
     }
 
     LCIter& operator++() noexcept
@@ -136,9 +145,12 @@ namespace ivantsova
     }
 
   private:
-    const typename List<T>::Node* ptr;
-    const typename List<T>::Node* head;
-    explicit LCIter(const typename List<T>::Node* p, const typename List<T>::Node* h) noexcept : ptr(p), head(h) {}
+    const typename List< T >::Node* ptr;
+    const typename List< T >::Node* head;
+    explicit LCIter(const typename List< T >::Node* p, const typename List< T >::Node* h) noexcept:
+     ptr(p),
+     head(h)
+    {}
   };
 
   template< class T > class List
@@ -153,23 +165,34 @@ namespace ivantsova
       Node* prev;
       Node* next;
 
-      explicit Node(const T& val, Node* p = nullptr, Node* n = nullptr) :
-        data(val), prev(p), next(n) {}
+      explicit Node(const T& val, Node* p = nullptr, Node* n = nullptr):
+       data(val),
+       prev(p),
+       next(n)
+      {}
 
-      explicit Node(T&& val, Node* p = nullptr, Node* n = nullptr) :
-        data(std::move(val)), prev(p), next(n) {}
+      explicit Node(T&& val, Node* p = nullptr, Node* n = nullptr):
+       data(std::move(val)),
+       prev(p),
+       next(n)
+      {}
     };
 
     Node* head;
     size_t size_;
 
   public:
-    List() noexcept : head(nullptr), size_(0) {}
+    List() noexcept:
+     head(nullptr),
+     size_(0)
+    {}
     ~List()
     {
       clear();
     }
-    List(const List& other) : head(nullptr), size_(0)
+    List(const List& other):
+     head(nullptr),
+     size_(0)
     {
       if (other.head)
       {
@@ -187,7 +210,9 @@ namespace ivantsova
       }
     }
 
-    List(List&& other) noexcept : head(other.head), size_(other.size_)
+    List(List&& other) noexcept:
+     head(other.head),
+     size_(other.size_)
     {
       other.head = nullptr;
       other.size_ = 0;
@@ -274,22 +299,7 @@ namespace ivantsova
 
     void push_front(const T& value)
     {
-      Node* new_node = new Node(value);
-      if (empty())
-      {
-        head = new_node;
-        head->prev = head;
-        head->next = head;
-      }
-      else
-      {
-        new_node->prev = head->prev;
-        new_node->next = head;
-        head->prev->next = new_node;
-        head->prev = new_node;
-        head = new_node;
-      }
-      size_++;
+      push_front(const_cast< T& >(value));
     }
 
     void push_front(T&& value)
@@ -401,71 +411,56 @@ namespace ivantsova
       }
     }
 
-    LIter<T> begin() const noexcept
+    LIter< T > begin() const noexcept
     {
-      return LIter<T>(head, head);
+      return LIter< T >(head, head);
     }
 
-    LIter<T> end() const noexcept
+    LIter< T > end() const noexcept
     {
-       return LIter<T>(nullptr, head);
+       return LIter< T >(nullptr, head);
     }
 
-    LCIter<T> cbegin() const noexcept
+    LCIter< T > cbegin() const noexcept
     {
-      return LCIter<T>(head, head);
+      return LCIter< T >(head, head);
     }
 
-    LCIter<T> cend() const noexcept
+    LCIter< T > cend() const noexcept
     {
-      return LCIter<T>(nullptr, head);
+      return LCIter< T >(nullptr, head);
     }
 
-    LIter<T> insert(LIter<T> pos, const T& value)
+    LIter< T > insert(LIter< T > pos, const T& value)
     {
-      if (empty())
-      {
-        push_back(value);
-        return LIter<T>(head, head);
-      }
-      Node* curr = pos.ptr;
-      if (curr == nullptr)
-      {
-        push_back(value);
-        return LIter<T>(head->prev, head);
-      }
-      Node* new_node = new Node(value, curr->prev, curr);
-      curr->prev->next = new_node;
-      curr->prev = new_node;
-      size_++;
-      return LIter<T>(new_node, head);
+      return insert(pos, const_cast< T& >(value));
     }
 
-    LIter<T> insert(LIter<T> pos, T&& value)
+    LIter< T > insert(LIter< T > pos, T&& value)
     {
       if (empty())
       {
         push_back(std::move(value));
-        return LIter<T>(head, head);
+        return LIter< T >(head, head);
       }
       Node* curr = pos.ptr;
       if (curr == nullptr)
       {
         push_back(std::move(value));
-        return LIter<T>(head->prev, head);
+        return LIter< T >(head->prev, head);
       }
       Node* new_node = new Node(std::move(value), curr->prev, curr);
       curr->prev->next = new_node;
       curr->prev = new_node;
       size_++;
-      return LIter<T>(new_node, head);
+      return LIter< T >(new_node, head);
     }
 
-    LIter<T> erase(LIter<T> pos)
+    LIter< T > erase(LIter< T > pos)
     {
       if (empty() || pos.ptr == nullptr)
       {
-        return LIter<T>();
+        return LIter< T >();
       }
       Node* toDelete = pos.ptr;
       Node* next = toDelete->next;
@@ -474,7 +469,7 @@ namespace ivantsova
         delete toDelete;
         head = nullptr;
         size_ = 0;
-        return LIter<T>();
+        return LIter< T >();
       }
       toDelete->prev->next = toDelete->next;
       toDelete->next->prev = toDelete->prev;
@@ -484,13 +479,12 @@ namespace ivantsova
       }
       delete toDelete;
       size_--;
-      return LIter<T>(next == head ? nullptr : next, head);
+      return LIter< T >(next == head ? nullptr : next, head);
     }
   };
-  template < class T >
-  void sum(T& total, const T& add)
+  void sum(unsigned long long& total, unsigned long long add)
   {
-    if (std::numeric_limits<T>::max() - add < total)
+    if (std::numeric_limits< unsigned long long >::max() - add < total)
     {
       throw std::overflow_error("Overflow error");
     }
