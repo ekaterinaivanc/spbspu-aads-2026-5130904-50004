@@ -76,9 +76,9 @@ namespace ivantsova
   private:
     typename List< T >::Node* ptr;
     typename List< T >::Node* head;
-    explicit LIter(typename List< T >::Node* p, typename List< T >::Node* h) noexcept :
-      ptr(p),
-      head(h)
+    explicit LIter(typename List< T >::Node* p, typename List< T >::Node* h) noexcept:
+     ptr(p),
+     head(h)
     {}
   };
 
@@ -299,7 +299,8 @@ namespace ivantsova
 
     void push_front(const T& value)
     {
-      push_front(const_cast< T& >(value));
+      T temp = value;
+      push_front(std::move(temp));
     }
 
     void push_front(T&& value)
@@ -324,21 +325,8 @@ namespace ivantsova
 
     void push_back(const T& value)
     {
-      Node* new_node = new Node(value);
-      if (empty())
-      {
-        head = new_node;
-        head->prev = head;
-        head->next = head;
-      }
-      else
-      {
-        new_node->prev = head->prev;
-        new_node->next = head;
-        head->prev->next = new_node;
-        head->prev = new_node;
-      }
-      size_++;
+      T temp = value;
+      push_back(std::move(temp));
     }
 
     void push_back(T&& value)
@@ -433,7 +421,8 @@ namespace ivantsova
 
     LIter< T > insert(LIter< T > pos, const T& value)
     {
-      return insert(pos, const_cast< T& >(value));
+      T temp = value;
+      return insert(pos, std::move(temp));
     }
 
     LIter< T > insert(LIter< T > pos, T&& value)
