@@ -471,7 +471,7 @@ namespace ivantsova
       return LIter< T >(next == head ? nullptr : next, head);
     }
   };
-  void sum(unsigned long long& total, unsigned long long add)
+  inline void sum(unsigned long long& total, unsigned long long add)
   {
     if (std::numeric_limits< unsigned long long >::max() - add < total)
     {
