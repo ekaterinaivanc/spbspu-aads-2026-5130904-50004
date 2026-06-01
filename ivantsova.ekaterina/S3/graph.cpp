@@ -1,13 +1,15 @@
-#include "hashIters.hpp"
-#include "graph.hpp"
 #include <algorithm>
 #include <stdexcept>
+#include "hashIters.hpp"
+#include "graph.hpp"
 
-ivantsova::Graph::Graph() :
-  vertices_(), edges_()
+ivantsova::Graph::Graph():
+ vertices_(),
+ edges_()
 {}
 
-void ivantsova::Graph::addVertex(const std::string& name) {
+void ivantsova::Graph::addVertex(const std::string& name)
+{
   for (size_t i = 0; i < vertices_.getSize(); ++i) {
     if (vertices_[i] == name) {
       return;
@@ -16,7 +18,8 @@ void ivantsova::Graph::addVertex(const std::string& name) {
   vertices_.pushBack(name);
 }
 
-bool ivantsova::Graph::hasVertex(const std::string& name) const {
+bool ivantsova::Graph::hasVertex(const std::string& name) const
+{
   for (size_t i = 0; i < vertices_.getSize(); ++i) {
     if (vertices_[i] == name) {
       return true;
@@ -25,11 +28,13 @@ bool ivantsova::Graph::hasVertex(const std::string& name) const {
   return false;
 }
 
-ivantsova::Vector<std::string> ivantsova::Graph::getVertices() const {
+ivantsova::Vector< std::string > ivantsova::Graph::getVertices() const
+{
   return vertices_;
 }
 
-void ivantsova::Graph::addEdge(const std::string& from, const std::string& to, unsigned long long weight) {
+void ivantsova::Graph::addEdge(const std::string& from, const std::string& to, unsigned long long weight)
+{
   addVertex(from);
   addVertex(to);
   EdgeKey key(from, to);
@@ -42,7 +47,8 @@ void ivantsova::Graph::addEdge(const std::string& from, const std::string& to, u
   }
 }
 
-bool ivantsova::Graph::removeEdge(const std::string& from, const std::string& to, unsigned long long weight) {
+bool ivantsova::Graph::removeEdge(const std::string& from, const std::string& to, unsigned long long weight)
+{
   if (!hasVertex(from) || !hasVertex(to)) {
     return false;
   }
@@ -50,7 +56,7 @@ bool ivantsova::Graph::removeEdge(const std::string& from, const std::string& to
   if (!edges_.has(key)) {
     return false;
   }
-  Vector<unsigned long long>& weights = edges_.get(key);
+  Vector< unsigned long long >& weights = edges_.get(key);
   for (size_t i = 0; i < weights.getSize(); ++i) {
     if (weights[i] == weight) {
       for (size_t j = i; j < weights.getSize() - 1; ++j) {
@@ -67,7 +73,8 @@ bool ivantsova::Graph::removeEdge(const std::string& from, const std::string& to
 }
 
 ivantsova::Vector< std::pair< std::string, ivantsova::Vector< unsigned long long > > >
-ivantsova::Graph::getOutbound(const std::string& vertex) const {
+ivantsova::Graph::getOutbound(const std::string& vertex) const
+{
   Vector< std::pair< std::string, Vector< unsigned long long > > > result;
   if (vertices_.getSize() == 0) {
     return result;
@@ -164,7 +171,8 @@ ivantsova::Graph::getInbound(const std::string& vertex) const {
   return result;
 }
 
-ivantsova::Graph ivantsova::Graph::merge(const Graph& other) const {
+ivantsova::Graph ivantsova::Graph::merge(const Graph& other) const
+{
   Graph result;
   for (size_t i = 0; i < vertices_.getSize(); ++i) {
     result.addVertex(vertices_[i]);
@@ -190,7 +198,8 @@ ivantsova::Graph ivantsova::Graph::merge(const Graph& other) const {
   return result;
 }
 
-ivantsova::Graph ivantsova::Graph::extract(const Vector< std::string >& vertices) const {
+ivantsova::Graph ivantsova::Graph::extract(const Vector< std::string >& vertices) const
+{
   Graph result;
   for (size_t i = 0; i < vertices.getSize(); ++i) {
     if (hasVertex(vertices[i])) {
