@@ -4,11 +4,12 @@
 #include "treenode.hpp"
 
 namespace ivantsova {
-  template < class Key, class Value, class Compare >
+  template< class Key, class Value, class Compare >
   class BSTree;
 
-  template < class Key, class Value >
-  class BSTIterator {
+  template< class Key, class Value >
+  class BSTIterator
+  {
   public:
     using Node = TreeNode< Key, Value >;
 
@@ -22,15 +23,16 @@ namespace ivantsova {
     bool operator==(const BSTIterator &other) const;
     bool operator!=(const BSTIterator &other) const;
 
-    template < class K, class V, class C >
+    template< class K, class V, class C >
     friend class BSTree;
 
   private:
     Node *node_;
   };
 
-  template < class Key, class Value >
-  class BSTConstIterator {
+  template< class Key, class Value >
+  class BSTConstIterator
+  {
   public:
     using Node = TreeNode< Key, Value >;
 
@@ -44,7 +46,7 @@ namespace ivantsova {
     bool operator==(const BSTConstIterator &other) const;
     bool operator!=(const BSTConstIterator &other) const;
 
-    template < class K, class V, class C >
+    template< class K, class V, class C >
     friend class BSTree;
 
   private:
@@ -52,23 +54,26 @@ namespace ivantsova {
   };
 }
 
-template < class Key, class Value >
-ivantsova::BSTIterator< Key, Value >::BSTIterator(Node *node) :
-  node_(node)
+template< class Key, class Value >
+ivantsova::BSTIterator< Key, Value >::BSTIterator(Node *node):
+ node_(node)
 {}
 
-template < class Key, class Value >
-std::pair< const Key, Value > &ivantsova::BSTIterator< Key, Value >::operator*() const {
+template< class Key, class Value >
+std::pair< const Key, Value > &ivantsova::BSTIterator< Key, Value >::operator*() const
+{
   return node_->data;
 }
 
-template < class Key, class Value >
-std::pair< const Key, Value > *ivantsova::BSTIterator< Key, Value >::operator->() const {
+template< class Key, class Value >
+std::pair< const Key, Value > *ivantsova::BSTIterator< Key, Value >::operator->() const
+{
   return &node_->data;
 }
 
-template < class Key, class Value >
-ivantsova::BSTIterator< Key, Value > &ivantsova::BSTIterator< Key, Value >::operator++() {
+template< class Key, class Value >
+ivantsova::BSTIterator< Key, Value > &ivantsova::BSTIterator< Key, Value >::operator++()
+{
   if (node_ == nullptr) {
     return *this;
   }
@@ -88,15 +93,17 @@ ivantsova::BSTIterator< Key, Value > &ivantsova::BSTIterator< Key, Value >::oper
   return *this;
 }
 
-template < class Key, class Value >
-ivantsova::BSTIterator< Key, Value > ivantsova::BSTIterator< Key, Value >::operator++(int) {
+template< class Key, class Value >
+ivantsova::BSTIterator< Key, Value > ivantsova::BSTIterator< Key, Value >::operator++(int)
+{
   BSTIterator tmp = *this;
   ++(*this);
   return tmp;
 }
 
-template < class Key, class Value >
-ivantsova::BSTIterator< Key, Value > &ivantsova::BSTIterator< Key, Value >::operator--() {
+template< class Key, class Value >
+ivantsova::BSTIterator< Key, Value > &ivantsova::BSTIterator< Key, Value >::operator--()
+{
   if (node_ == nullptr) {
     return *this;
   }
@@ -116,40 +123,46 @@ ivantsova::BSTIterator< Key, Value > &ivantsova::BSTIterator< Key, Value >::oper
   return *this;
 }
 
-template < class Key, class Value >
-ivantsova::BSTIterator< Key, Value > ivantsova::BSTIterator< Key, Value >::operator--(int) {
+template< class Key, class Value >
+ivantsova::BSTIterator< Key, Value > ivantsova::BSTIterator< Key, Value >::operator--(int)
+{
   BSTIterator tmp = *this;
   --(*this);
   return tmp;
 }
 
-template < class Key, class Value >
-bool ivantsova::BSTIterator< Key, Value >::operator==(const BSTIterator &other) const {
+template< class Key, class Value >
+bool ivantsova::BSTIterator< Key, Value >::operator==(const BSTIterator &other) const
+{
   return node_ == other.node_;
 }
 
-template < class Key, class Value >
-bool ivantsova::BSTIterator< Key, Value >::operator!=(const BSTIterator &other) const {
+template< class Key, class Value >
+bool ivantsova::BSTIterator< Key, Value >::operator!=(const BSTIterator &other) const
+{
   return node_ != other.node_;
 }
 
-template < class Key, class Value >
-ivantsova::BSTConstIterator< Key, Value >::BSTConstIterator(const Node *node) :
-  node_(node)
+template< class Key, class Value >
+ivantsova::BSTConstIterator< Key, Value >::BSTConstIterator(const Node *node):
+ node_(node)
 {}
 
-template < class Key, class Value >
-const std::pair< const Key, Value > &ivantsova::BSTConstIterator< Key, Value >::operator*() const {
+template< class Key, class Value >
+const std::pair< const Key, Value > &ivantsova::BSTConstIterator< Key, Value >::operator*() const
+{
   return node_->data;
 }
 
-template < class Key, class Value >
-const std::pair< const Key, Value > *ivantsova::BSTConstIterator< Key, Value >::operator->() const {
+template< class Key, class Value >
+const std::pair< const Key, Value > *ivantsova::BSTConstIterator< Key, Value >::operator->() const
+{
   return &node_->data;
 }
 
-template < class Key, class Value >
-ivantsova::BSTConstIterator< Key, Value > &ivantsova::BSTConstIterator< Key, Value >::operator++() {
+template< class Key, class Value >
+ivantsova::BSTConstIterator< Key, Value > &ivantsova::BSTConstIterator< Key, Value >::operator++()
+{
   if (node_ == nullptr) {
     return *this;
   }
@@ -169,15 +182,17 @@ ivantsova::BSTConstIterator< Key, Value > &ivantsova::BSTConstIterator< Key, Val
   return *this;
 }
 
-template < class Key, class Value >
-ivantsova::BSTConstIterator< Key, Value > ivantsova::BSTConstIterator< Key, Value >::operator++(int) {
+template< class Key, class Value >
+ivantsova::BSTConstIterator< Key, Value > ivantsova::BSTConstIterator< Key, Value >::operator++(int)
+{
   BSTConstIterator tmp = *this;
   ++(*this);
   return tmp;
 }
 
-template < class Key, class Value >
-ivantsova::BSTConstIterator< Key, Value > &ivantsova::BSTConstIterator< Key, Value >::operator--() {
+template< class Key, class Value >
+ivantsova::BSTConstIterator< Key, Value > &ivantsova::BSTConstIterator< Key, Value >::operator--()
+{
   if (node_ == nullptr) {
     return *this;
   }
@@ -197,20 +212,23 @@ ivantsova::BSTConstIterator< Key, Value > &ivantsova::BSTConstIterator< Key, Val
   return *this;
 }
 
-template < class Key, class Value >
-ivantsova::BSTConstIterator< Key, Value > ivantsova::BSTConstIterator< Key, Value >::operator--(int) {
+template< class Key, class Value >
+ivantsova::BSTConstIterator< Key, Value > ivantsova::BSTConstIterator< Key, Value >::operator--(int)
+{
   BSTConstIterator tmp = *this;
   --(*this);
   return tmp;
 }
 
-template < class Key, class Value >
-bool ivantsova::BSTConstIterator< Key, Value >::operator==(const BSTConstIterator &other) const {
+template< class Key, class Value >
+bool ivantsova::BSTConstIterator< Key, Value >::operator==(const BSTConstIterator &other) const
+{
   return node_ == other.node_;
 }
 
-template < class Key, class Value >
-bool ivantsova::BSTConstIterator< Key, Value >::operator!=(const BSTConstIterator &other) const {
+template< class Key, class Value >
+bool ivantsova::BSTConstIterator< Key, Value >::operator!=(const BSTConstIterator &other) const
+{
   return node_ != other.node_;
 }
 

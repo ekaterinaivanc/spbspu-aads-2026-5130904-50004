@@ -4,7 +4,8 @@
 #include <string>
 #include "commands.hpp"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   if (argc != 2) {
     std::cerr << "Incorrect number of arguments" << "\n";
     return 1;

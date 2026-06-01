@@ -8,8 +8,9 @@
 #include "treenode.hpp"
 
 namespace ivantsova {
-  template < class Key, class Value, class Compare = std::less< Key > >
-  class BSTree {
+  template< class Key, class Value, class Compare = std::less< Key > >
+  class BSTree
+  {
   public:
     using Node = TreeNode< Key, Value >;
     using iterator = BSTIterator< Key, Value >;
@@ -64,28 +65,29 @@ namespace ivantsova {
   };
 }
 
-template < class Key, class Value, class Compare >
-ivantsova::BSTree< Key, Value, Compare >::BSTree() :
-  fake_root_(new Node(Key(), Value())),
-  size_(0),
-  comp_()
+template< class Key, class Value, class Compare >
+ivantsova::BSTree< Key, Value, Compare >::BSTree():
+ fake_root_(new Node(Key(), Value())),
+ size_(0),
+ comp_()
 {
   fake_root_->left_ = nullptr;
   fake_root_->right_ = nullptr;
   fake_root_->parent_ = nullptr;
 }
 
-template < class Key, class Value, class Compare >
-ivantsova::BSTree< Key, Value, Compare >::~BSTree() {
+template< class Key, class Value, class Compare >
+ivantsova::BSTree< Key, Value, Compare >::~BSTree()
+{
   clear();
   delete fake_root_;
 }
 
-template < class Key, class Value, class Compare >
-ivantsova::BSTree< Key, Value, Compare >::BSTree(const BSTree &other) :
-  fake_root_(new Node(Key(), Value())),
-  size_(0),
-  comp_(other.comp_)
+template< class Key, class Value, class Compare >
+ivantsova::BSTree< Key, Value, Compare >::BSTree(const BSTree &other):
+ fake_root_(new Node(Key(), Value())),
+ size_(0),
+ comp_(other.comp_)
 {
   fake_root_->left_ = nullptr;
   fake_root_->right_ = nullptr;
@@ -96,8 +98,9 @@ ivantsova::BSTree< Key, Value, Compare >::BSTree(const BSTree &other) :
   }
 }
 
-template < class Key, class Value, class Compare >
-ivantsova::BSTree< Key, Value, Compare > &ivantsova::BSTree< Key, Value, Compare >::operator=(const BSTree &other) {
+template< class Key, class Value, class Compare >
+ivantsova::BSTree< Key, Value, Compare > &ivantsova::BSTree< Key, Value, Compare >::operator=(const BSTree &other)
+{
   if (this != &other) {
     BSTree temp(other);
     swap(temp);
@@ -105,25 +108,29 @@ ivantsova::BSTree< Key, Value, Compare > &ivantsova::BSTree< Key, Value, Compare
   return *this;
 }
 
-template < class Key, class Value, class Compare >
-bool ivantsova::BSTree< Key, Value, Compare >::empty() const {
+template< class Key, class Value, class Compare >
+bool ivantsova::BSTree< Key, Value, Compare >::empty() const
+{
   return size_ == 0;
 }
 
-template < class Key, class Value, class Compare >
-size_t ivantsova::BSTree< Key, Value, Compare >::size() const {
+template< class Key, class Value, class Compare >
+size_t ivantsova::BSTree< Key, Value, Compare >::size() const
+{
   return size_;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::Node *
-ivantsova::BSTree< Key, Value, Compare >::getRealRoot() const {
+ivantsova::BSTree< Key, Value, Compare >::getRealRoot() const
+{
   return fake_root_->right_;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::Node *
-ivantsova::BSTree< Key, Value, Compare >::clone(Node *src, Node *parent) {
+ivantsova::BSTree< Key, Value, Compare >::clone(Node *src, Node *parent)
+{
   if (src == nullptr) {
     return nullptr;
   }
@@ -133,8 +140,9 @@ ivantsova::BSTree< Key, Value, Compare >::clone(Node *src, Node *parent) {
   return n;
 }
 
-template < class Key, class Value, class Compare >
-void ivantsova::BSTree< Key, Value, Compare >::clearImpl(Node *node) noexcept {
+template< class Key, class Value, class Compare >
+void ivantsova::BSTree< Key, Value, Compare >::clearImpl(Node *node) noexcept
+{
   if (node == nullptr) {
     return;
   }
@@ -143,7 +151,7 @@ void ivantsova::BSTree< Key, Value, Compare >::clearImpl(Node *node) noexcept {
   delete node;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 void ivantsova::BSTree< Key, Value, Compare >::clear() noexcept
 {
   clearImpl(getRealRoot());
@@ -151,8 +159,9 @@ void ivantsova::BSTree< Key, Value, Compare >::clear() noexcept
   size_ = 0;
 }
 
-template < class Key, class Value, class Compare >
-void ivantsova::BSTree< Key, Value, Compare >::swap(BSTree &other) noexcept {
+template< class Key, class Value, class Compare >
+void ivantsova::BSTree< Key, Value, Compare >::swap(BSTree &other) noexcept
+{
   Node *tmp_root = fake_root_;
   fake_root_ = other.fake_root_;
   other.fake_root_ = tmp_root;
@@ -166,9 +175,10 @@ void ivantsova::BSTree< Key, Value, Compare >::swap(BSTree &other) noexcept {
   other.comp_ = tmp_comp;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::Node *
-ivantsova::BSTree< Key, Value, Compare >::findNode(const Key &k) const {
+ivantsova::BSTree< Key, Value, Compare >::findNode(const Key &k) const
+{
   Node *cur = getRealRoot();
   while (cur != nullptr) {
     if (comp_(k, cur->data.first)) {
@@ -182,14 +192,16 @@ ivantsova::BSTree< Key, Value, Compare >::findNode(const Key &k) const {
   return nullptr;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::Node *
-ivantsova::BSTree< Key, Value, Compare >::findNode(const Key &k) {
-  return const_cast<Node *>(static_cast<const BSTree &>(*this).findNode(k));
+ivantsova::BSTree< Key, Value, Compare >::findNode(const Key &k)
+{
+  return const_cast< Node * >(static_cast< const BSTree & >(*this).findNode(k));
 }
 
-template < class Key, class Value, class Compare >
-Value ivantsova::BSTree< Key, Value, Compare >::get(const Key &k) const {
+template< class Key, class Value, class Compare >
+Value ivantsova::BSTree< Key, Value, Compare >::get(const Key &k) const
+{
   Node *n = findNode(k);
   if (n == nullptr) {
     throw std::out_of_range("Key not found");
@@ -197,20 +209,23 @@ Value ivantsova::BSTree< Key, Value, Compare >::get(const Key &k) const {
   return n->data.second;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::find(const Key &k) const {
+ivantsova::BSTree< Key, Value, Compare >::find(const Key &k) const
+{
   return const_iterator(findNode(k));
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::iterator
-ivantsova::BSTree< Key, Value, Compare >::find(const Key &k) {
+ivantsova::BSTree< Key, Value, Compare >::find(const Key &k)
+{
   return iterator(findNode(k));
 }
 
-template < class Key, class Value, class Compare >
-void ivantsova::BSTree< Key, Value, Compare >::push(const Key &k, const Value &v) {
+template< class Key, class Value, class Compare >
+void ivantsova::BSTree< Key, Value, Compare >::push(const Key &k, const Value &v)
+{
   if (getRealRoot() == nullptr) {
     fake_root_->right_ = new Node(k, v, fake_root_);
     ++size_;
@@ -239,14 +254,15 @@ void ivantsova::BSTree< Key, Value, Compare >::push(const Key &k, const Value &v
   }
 }
 
-template < class Key, class Value, class Compare >
-void ivantsova::BSTree< Key, Value, Compare >::removeNode(Node *node) {
+template< class Key, class Value, class Compare >
+void ivantsova::BSTree< Key, Value, Compare >::removeNode(Node *node)
+{
   if (node == nullptr || node == fake_root_) {
     return;
   }
   if (node->left_ != nullptr && node->right_ != nullptr) {
     Node *succ = fallLeft(node->right_);
-    const_cast<Key &>(node->data.first) = succ->data.first;
+    const_cast< Key & >(node->data.first) = succ->data.first;
     node->data.second = succ->data.second;
     node = succ;
   }
@@ -264,8 +280,9 @@ void ivantsova::BSTree< Key, Value, Compare >::removeNode(Node *node) {
   delete node;
 }
 
-template < class Key, class Value, class Compare >
-Value ivantsova::BSTree< Key, Value, Compare >::drop(const Key &k) {
+template< class Key, class Value, class Compare >
+Value ivantsova::BSTree< Key, Value, Compare >::drop(const Key &k)
+{
   Node *node = findNode(k);
   if (node == nullptr) {
     throw std::out_of_range("Key not found");
@@ -276,55 +293,63 @@ Value ivantsova::BSTree< Key, Value, Compare >::drop(const Key &k) {
   return res;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::Node *
-ivantsova::BSTree< Key, Value, Compare >::fallLeft(Node *node) const {
+ivantsova::BSTree< Key, Value, Compare >::fallLeft(Node *node) const
+{
   while (node != nullptr && node->left_ != nullptr) {
     node = node->left_;
   }
   return node;
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::iterator
-ivantsova::BSTree< Key, Value, Compare >::begin() {
+ivantsova::BSTree< Key, Value, Compare >::begin()
+{
   return iterator(fallLeft(getRealRoot()));
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::iterator
-ivantsova::BSTree< Key, Value, Compare >::end() noexcept {
+ivantsova::BSTree< Key, Value, Compare >::end() noexcept
+{
   return iterator(nullptr);
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::begin() const {
+ivantsova::BSTree< Key, Value, Compare >::begin() const
+{
   return const_iterator(fallLeft(getRealRoot()));
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::end() const noexcept {
+ivantsova::BSTree< Key, Value, Compare >::end() const noexcept
+{
   return const_iterator(nullptr);
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::cbegin() const noexcept {
+ivantsova::BSTree< Key, Value, Compare >::cbegin() const noexcept
+{
   return const_iterator(fallLeft(getRealRoot()));
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::cend() const noexcept {
+ivantsova::BSTree< Key, Value, Compare >::cend() const noexcept
+{
   return const_iterator(nullptr);
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::rotateLeft(const_iterator it) {
-  Node *child = const_cast<Node *>(it.node_);
+ivantsova::BSTree< Key, Value, Compare >::rotateLeft(const_iterator it)
+{
+  Node *child = const_cast< Node * >(it.node_);
   if (child == nullptr || child->right_ == nullptr || child->parent_ == fake_root_) {
     return it;
   }
@@ -347,10 +372,11 @@ ivantsova::BSTree< Key, Value, Compare >::rotateLeft(const_iterator it) {
   return const_iterator(rightChild);
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::rotateRight(const_iterator it) {
-  Node *child = const_cast<Node *>(it.node_);
+ivantsova::BSTree< Key, Value, Compare >::rotateRight(const_iterator it)
+{
+  Node *child = const_cast< Node * >(it.node_);
   if (child == nullptr || child->left_ == nullptr || child->parent_ == fake_root_) {
     return it;
   }
@@ -373,10 +399,11 @@ ivantsova::BSTree< Key, Value, Compare >::rotateRight(const_iterator it) {
   return const_iterator(leftChild);
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::rotateLargeLeft(const_iterator it) {
-  Node *node = const_cast<Node *>(it.node_);
+ivantsova::BSTree< Key, Value, Compare >::rotateLargeLeft(const_iterator it)
+{
+  Node *node = const_cast< Node * >(it.node_);
   if (node == nullptr || node->left_ == nullptr || node->left_->right_ == nullptr) {
     return it;
   }
@@ -384,10 +411,11 @@ ivantsova::BSTree< Key, Value, Compare >::rotateLargeLeft(const_iterator it) {
   return rotateLeft(it);
 }
 
-template < class Key, class Value, class Compare >
+template< class Key, class Value, class Compare >
 typename ivantsova::BSTree< Key, Value, Compare >::const_iterator
-ivantsova::BSTree< Key, Value, Compare >::rotateLargeRight(const_iterator it) {
-  Node *node = const_cast<Node *>(it.node_);
+ivantsova::BSTree< Key, Value, Compare >::rotateLargeRight(const_iterator it)
+{
+  Node *node = const_cast< Node * >(it.node_);
   if (node == nullptr || node->right_ == nullptr || node->right_->left_ == nullptr) {
     return it;
   }
@@ -395,8 +423,9 @@ ivantsova::BSTree< Key, Value, Compare >::rotateLargeRight(const_iterator it) {
   return rotateRight(it);
 }
 
-template < class Key, class Value, class Compare >
-size_t ivantsova::BSTree< Key, Value, Compare >::calcHeight(const Node *node) const {
+template< class Key, class Value, class Compare >
+size_t ivantsova::BSTree< Key, Value, Compare >::calcHeight(const Node *node) const
+{
   if (node == nullptr) {
     return 0;
   }
@@ -405,13 +434,15 @@ size_t ivantsova::BSTree< Key, Value, Compare >::calcHeight(const Node *node) co
   return 1 + ((l > r) ? l : r);
 }
 
-template < class Key, class Value, class Compare >
-size_t ivantsova::BSTree< Key, Value, Compare >::height() const {
+template< class Key, class Value, class Compare >
+size_t ivantsova::BSTree< Key, Value, Compare >::height() const
+{
   return calcHeight(getRealRoot());
 }
 
-template < class Key, class Value, class Compare >
-size_t ivantsova::BSTree< Key, Value, Compare >::height(const_iterator it) const {
+template< class Key, class Value, class Compare >
+size_t ivantsova::BSTree< Key, Value, Compare >::height(const_iterator it) const
+{
   return calcHeight(it.node_);
 }
 

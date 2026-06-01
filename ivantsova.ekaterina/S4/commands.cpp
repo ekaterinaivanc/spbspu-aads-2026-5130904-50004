@@ -1,7 +1,8 @@
-#include "commands.hpp"
 #include <stdexcept>
+#include "commands.hpp"
 
-void ivantsova::cmdPrint(std::istream &in, std::ostream &out, Datasets &datasets) {
+void ivantsova::cmdPrint(std::istream &in, std::ostream &out, Datasets &datasets)
+{
   std::string name;
   if (!(in >> name)) {
     throw std::runtime_error("Invalid input");
@@ -22,7 +23,8 @@ void ivantsova::cmdPrint(std::istream &in, std::ostream &out, Datasets &datasets
   }
 }
 
-void ivantsova::cmdComplement(std::istream &in, std::ostream &, Datasets &datasets) {
+void ivantsova::cmdComplement(std::istream &in, std::ostream &, Datasets &datasets)
+{
   std::string newName, name1, name2;
   if (!(in >> newName >> name1 >> name2)) {
     throw std::runtime_error("Invalid input");
@@ -43,7 +45,8 @@ void ivantsova::cmdComplement(std::istream &in, std::ostream &, Datasets &datase
   datasets.push(newName, newDs);
 }
 
-void ivantsova::cmdIntersect(std::istream &in, std::ostream &, Datasets &datasets) {
+void ivantsova::cmdIntersect(std::istream &in, std::ostream &, Datasets &datasets)
+{
   std::string newName, name1, name2;
   if (!(in >> newName >> name1 >> name2)) {
     throw std::runtime_error("Invalid input");
@@ -64,7 +67,8 @@ void ivantsova::cmdIntersect(std::istream &in, std::ostream &, Datasets &dataset
   datasets.push(newName, newDs);
 }
 
-void ivantsova::cmdUnion(std::istream &in, std::ostream &, Datasets &datasets) {
+void ivantsova::cmdUnion(std::istream &in, std::ostream &, Datasets &datasets)
+{
   std::string newName, name1, name2;
   if (!(in >> newName >> name1 >> name2)) {
     throw std::runtime_error("Invalid input");
