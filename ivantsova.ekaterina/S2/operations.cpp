@@ -1,45 +1,36 @@
-#include "operations.hpp"
 #include <sstream>
 #include <cctype>
 #include <limits>
+#include "operations.hpp"
 
-int ivantsova::getPriority(const std::string& op) {
-  if (op == "+" || op == "-") {
-    return 1;
+bool ivantsova::higherPriority(const std::string& op1, const std::string& op2)
+{
+  int p1 = 0;
+  if (op1 == "+" || op1 == "-") {
+    p1 = 1;
+  } else if (op1 == "*" || op1 == "/" || op1 == "%") {
+    p1 = 2;
+  } else if (op1 == "<<") {
+    p1 = 3;
   }
-  if (op == "*" || op == "/" || op == "%") {
-    return 2;
+  int p2 = 0;
+  if (op2 == "+" || op2 == "-") {
+    p2 = 1;
+  } else if (op2 == "*" || op2 == "/" || op2 == "%") {
+    p2 = 2;
+  } else if (op2 == "<<") {
+    p2 = 3;
   }
-  if (op == "<<") {
-    return 3;
-  }
-  return 0;
+  return p1 >= p2;
 }
 
-bool ivantsova::isOperator(const std::string& token) {
+bool ivantsova::isOperator(const std::string& token)
+{
   return token == "+" || token == "-" || token == "*" || token == "/" || token == "%" || token == "<<";
 }
 
-bool ivantsova::isNumber(const std::string& token) {
-  if (token.empty()) {
-    return false;
-  }
-  size_t start = 0;
-  if (token[0] == '-') {
-    if (token.size() == 1) {
-      return false;
-    }
-    start = 1;
-  }
-  for (size_t i = start; i < token.size(); ++i) {
-    if (!std::isdigit(token[i])) {
-        return false;
-    }
-  }
-  return true;
-}
-
-long long ivantsova::useOperation(long long a, long long b, const std::string& op) {
+long long ivantsova::useOperation(long long a, long long b, const std::string& op)
+{
   if (op == "+") {
     if (b > 0 && a > std::numeric_limits< long long >::max() - b) {
       throw std::overflow_error("Addition overflow");
@@ -60,26 +51,23 @@ long long ivantsova::useOperation(long long a, long long b, const std::string& o
   }
   if (op == "*") {
     if (a != 0 && b != 0) {
-      if ((a > 0 && b > 0 && a > std::numeric_limits< long long >::max() / b) \
-       || (a < 0 && b < 0 && a < std::numeric_limits< long long >::max() / b)) {
+      const long long maxx = std::numeric_limits< long long >::max();
+      const long long minn = std::numeric_limits< long long >::min();
+      if ((a > 0 && b > 0 && a > maxx / b) || (a < 0 && b < 0 && a < maxx / b)) {
         throw std::overflow_error("Multiplication overflow");
       }
-      if ((a > 0 && b < 0 && b < std::numeric_limits< long long >::min() / a) \
-      || (a < 0 && b > 0 && a < std::numeric_limits< long long >::min() / b)) {
+      if ((a > 0 && b < 0 && b < minn / a) || (a < 0 && b > 0 && a < minn / b)) {
         throw std::underflow_error("Multiplication underflow");
       }
     }
     return a * b;
   }
-  if (op == "/") {
+  if (op == "/" || op == "%") {
     if (b == 0) {
       throw std::runtime_error("Division by zero");
     }
-    return a / b;
-  }
-  if (op == "%") {
-    if (b == 0) {
-      throw std::runtime_error("Division by zero");
+    if (op == "/") {
+      return a / b;
     }
     if (a % b < 0) {
       if (b > 0) {
@@ -102,7 +90,8 @@ long long ivantsova::useOperation(long long a, long long b, const std::string& o
   throw std::runtime_error("Unknown operator");
 }
 
-ivantsova::Queue< std::string > ivantsova::convertToPostfix(const std::string& line) {
+ivantsova::Queue< std::string > ivantsova::convertToPostfix(const std::string& line)
+{
   std::stringstream ss(line);
   std::string token;
   Queue< std::string > input;
@@ -116,29 +105,28 @@ ivantsova::Queue< std::string > ivantsova::convertToPostfix(const std::string& l
   Stack< std::string > operators;
   while (!input.empty()) {
     std::string tok = input.pop();
-    if (isNumber(tok)) {
+    try {
+      std::stoll(tok);
       output.push(tok);
-    }
-    else if (tok == "(") {
-      operators.push(tok);
-    }
-    else if (tok == ")") {
-      while (!operators.empty() && operators.top() != "(") {
-        output.push(operators.pop());
+    } catch (...) {
+      if (tok == "(") {
+        operators.push(tok);
+      } else if (tok == ")") {
+        while (!operators.empty() && operators.top() != "(") {
+          output.push(operators.pop());
+        }
+        if (operators.empty()) {
+          throw std::runtime_error("Mismatched parentheses");
+        }
+        operators.pop();
+      } else if (isOperator(tok)) {
+        while (!operators.empty() && operators.top() != "(" && higherPriority(operators.top(), tok)) {
+          output.push(operators.pop());
+        }
+        operators.push(tok);
+      } else {
+        throw std::runtime_error("Invalid token");
       }
-      if (operators.empty()) {
-        throw std::runtime_error("Mismatched parentheses");
-      }
-      operators.pop();
-    }
-    else if (isOperator(tok)) {
-      while (!operators.empty() && operators.top() != "(" && getPriority(operators.top()) >= getPriority(tok)) {
-        output.push(operators.pop());
-      }
-      operators.push(tok);
-    }
-    else {
-      throw std::runtime_error("Invalid token");
     }
   }
   while (!operators.empty()) {
@@ -150,23 +138,24 @@ ivantsova::Queue< std::string > ivantsova::convertToPostfix(const std::string& l
   return output;
 }
 
-long long ivantsova::calculatePostfix(Queue< std::string >& postfix) {
+long long ivantsova::calculatePostfix(Queue< std::string >& postfix)
+{
   Stack< long long > evalStack;
   while (!postfix.empty()) {
     std::string tok = postfix.pop();
-    if (isNumber(tok)) {
+    try {
       evalStack.push(std::stoll(tok));
-    }
-    else if (isOperator(tok)) {
-      if (evalStack.size() < 2) {
-        throw std::runtime_error("Not enough operands");
-      }
-      long long b = evalStack.pop();
-      long long a = evalStack.pop();
-      evalStack.push(useOperation(a, b, tok));
-    }
-    else {
+    } catch (...) {
+      if (isOperator(tok)) {
+        if (evalStack.size() < 2) {
+          throw std::runtime_error("Not enough operands");
+        }
+        long long b = evalStack.pop();
+        long long a = evalStack.pop();
+        evalStack.push(useOperation(a, b, tok));
+      } else {
         throw std::runtime_error("Invalid token in postfix");
+      }
     }
   }
   if (evalStack.size() != 1) {
@@ -175,7 +164,8 @@ long long ivantsova::calculatePostfix(Queue< std::string >& postfix) {
   return evalStack.pop();
 }
 
-long long ivantsova::calculateExpression(const std::string& line) {
+long long ivantsova::calculateExpression(const std::string& line)
+{
   Queue< std::string > postfix = convertToPostfix(line);
   return calculatePostfix(postfix);
 }

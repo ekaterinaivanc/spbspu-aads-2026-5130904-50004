@@ -3,7 +3,8 @@
 
 BOOST_AUTO_TEST_SUITE(QueueTests)
 
-BOOST_AUTO_TEST_CASE(queue_push_and_pop) {
+BOOST_AUTO_TEST_CASE(queue_push_and_pop)
+{
   ivantsova::Queue< int > queue;
   queue.push(1);
   queue.push(2);
@@ -17,12 +18,14 @@ BOOST_AUTO_TEST_CASE(queue_push_and_pop) {
   BOOST_CHECK(queue.empty());
 }
 
-BOOST_AUTO_TEST_CASE(queue_pop_empty) {
+BOOST_AUTO_TEST_CASE(queue_pop_empty)
+{
   ivantsova::Queue< int > queue;
   BOOST_CHECK_THROW(queue.pop(), std::out_of_range);
 }
 
-BOOST_AUTO_TEST_CASE(queue_front_empty) {
+BOOST_AUTO_TEST_CASE(queue_front_empty)
+{
   ivantsova::Queue< int > queue;
   BOOST_CHECK_THROW(queue.front(), std::out_of_range);
 }
