@@ -5,180 +5,18 @@
 #include <stdexcept>
 #include <utility>
 #include <limits>
-#include <memory>
+#include "node.hpp"
+#include "iterators.hpp"
 
 namespace ivantsova
 {
-  template< class T > class List;
-
-  template< class T > class LIter
-  {
-    friend class List< T >;
-
-  public:
-    LIter() noexcept:
-     ptr(nullptr),
-     head(nullptr)
-    {}
-    LIter(const LIter&) noexcept = default;
-    LIter(LIter&&) noexcept = default;
-    ~LIter() = default;
-    LIter& operator=(const LIter&) noexcept = default;
-    LIter& operator=(LIter&&) noexcept = default;
-
-    T& operator*() const noexcept
-    {
-      return ptr->data;
-    }
-
-    T* operator->() const noexcept
-    {
-      return std::addressof(ptr->data);
-    }
-
-    LIter& operator++() noexcept
-    {
-      ptr = ptr->next;
-      if (ptr == head)
-      {
-        ptr = nullptr;
-      }
-      return *this;
-    }
-
-    LIter& operator--() noexcept
-    {
-      if (ptr == nullptr)
-      {
-        if (head == nullptr)
-        {
-          return *this;
-        }
-        ptr = head->prev;
-      }
-      else
-      {
-        ptr = ptr->prev;
-      }
-      return *this;
-    }
-
-    bool operator==(const LIter& other) const noexcept
-    {
-      return ptr == other.ptr;
-    }
-
-    bool operator!=(const LIter& other) const noexcept
-    {
-      return ptr != other.ptr;
-    }
-
-  private:
-    typename List< T >::Node* ptr;
-    typename List< T >::Node* head;
-    explicit LIter(typename List< T >::Node* p, typename List< T >::Node* h) noexcept:
-     ptr(p),
-     head(h)
-    {}
-  };
-
-  template< class T > class LCIter
-  {
-    friend class ivantsova::List< T >;
-
-  public:
-    LCIter() noexcept:
-     ptr(nullptr),
-     head(nullptr)
-    {}
-    LCIter(const LCIter&) noexcept = default;
-    LCIter(LCIter&&) noexcept = default;
-    ~LCIter() = default;
-    LCIter& operator=(const LCIter&) noexcept = default;
-    LCIter& operator=(LCIter&&) noexcept = default;
-
-    const T& operator*() const noexcept
-    {
-      return ptr->data;
-    }
-
-    const T* operator->() const noexcept
-    {
-      return std::addressof(ptr->data);
-    }
-
-    LCIter& operator++() noexcept
-    {
-      ptr = ptr->next;
-      if (ptr == head)
-      {
-        ptr = nullptr;
-      }
-      return *this;
-    }
-
-    LCIter& operator--() noexcept
-    {
-      if (ptr == nullptr)
-      {
-        if (head == nullptr)
-        {
-          return *this;
-        }
-        ptr = head->prev;
-      }
-      else
-      {
-        ptr = ptr->prev;
-      }
-      return *this;
-    }
-
-    bool operator==(const LCIter& other) const noexcept
-    {
-      return ptr == other.ptr;
-    }
-
-    bool operator!=(const LCIter& other) const noexcept
-    {
-      return ptr != other.ptr;
-    }
-
-  private:
-    const typename List< T >::Node* ptr;
-    const typename List< T >::Node* head;
-    explicit LCIter(const typename List< T >::Node* p, const typename List< T >::Node* h) noexcept:
-     ptr(p),
-     head(h)
-    {}
-  };
-
   template< class T > class List
   {
     friend class LIter< T >;
     friend class LCIter< T >;
 
   private:
-    struct Node
-    {
-      T data;
-      Node* prev;
-      Node* next;
-
-      explicit Node(const T& val, Node* p = nullptr, Node* n = nullptr):
-       data(val),
-       prev(p),
-       next(n)
-      {}
-
-      explicit Node(T&& val, Node* p = nullptr, Node* n = nullptr):
-       data(std::move(val)),
-       prev(p),
-       next(n)
-      {}
-    };
-
-    Node* head;
+    Node< T >* head;
     size_t size_;
 
   public:
@@ -196,8 +34,8 @@ namespace ivantsova
     {
       if (other.head)
       {
-        Node* curr = other.head;
-        Node* first = other.head;
+        Node< T >* curr = other.head;
+        Node< T >* first = other.head;
         while (true)
         {
           push_back(curr->data);
@@ -243,7 +81,7 @@ namespace ivantsova
 
     void swap(List& other) noexcept
     {
-      Node* tmp_head = head;
+      Node< T >* tmp_head = head;
       size_t tmp_size = size_;
       head = other.head;
       size_ = other.size_;
@@ -305,7 +143,7 @@ namespace ivantsova
 
     void push_front(T&& value)
     {
-      Node* new_node = new Node(std::move(value));
+      Node< T >* new_node = new Node< T >(std::move(value));
       if (empty())
       {
         head = new_node;
@@ -331,7 +169,7 @@ namespace ivantsova
 
     void push_back(T&& value)
     {
-      Node* new_node = new Node(std::move(value));
+      Node< T >* new_node = new Node< T >(std::move(value));
       if (empty())
       {
         head = new_node;
@@ -361,7 +199,7 @@ namespace ivantsova
       }
       else
       {
-        Node* toDelete = head;
+        Node< T >* toDelete = head;
         head->prev->next = head->next;
         head->next->prev = head->prev;
         head = head->next;
@@ -383,7 +221,7 @@ namespace ivantsova
       }
       else
       {
-        Node* toDelete = head->prev;
+        Node< T >* toDelete = head->prev;
         toDelete->prev->next = head;
         head->prev = toDelete->prev;
         delete toDelete;
@@ -432,13 +270,13 @@ namespace ivantsova
         push_back(std::move(value));
         return LIter< T >(head, head);
       }
-      Node* curr = pos.ptr;
+      Node< T >* curr = pos.ptr;
       if (curr == nullptr)
       {
         push_back(std::move(value));
         return LIter< T >(head->prev, head);
       }
-      Node* new_node = new Node(std::move(value), curr->prev, curr);
+      Node< T >* new_node = new Node< T >(std::move(value), curr->prev, curr);
       curr->prev->next = new_node;
       curr->prev = new_node;
       size_++;
@@ -451,8 +289,8 @@ namespace ivantsova
       {
         return LIter< T >();
       }
-      Node* toDelete = pos.ptr;
-      Node* next = toDelete->next;
+      Node< T >* toDelete = pos.ptr;
+      Node< T >* next = toDelete->next;
       if (size_ == 1)
       {
         delete toDelete;

@@ -69,16 +69,12 @@ int main()
         std::cout << "\n";
         continue;
       }
-
-      bool firstInRow = true;
-      for (auto elemIt = it->cbegin(); elemIt != it->cend(); ++elemIt)
+      auto elemIt = it->cbegin();
+      std::cout << *elemIt;
+      ++elemIt;
+      for (; elemIt != it->cend(); ++elemIt)
       {
-        if (!firstInRow)
-        {
-          std::cout << ' ';
-        }
-        std::cout << *elemIt;
-        firstInRow = false;
+        std::cout << ' ' << *elemIt;
       }
       std::cout << "\n";
     }
