@@ -261,3 +261,132 @@ void ivantsova::cmdUpdate(const MyVector< std::string >& args, ivantsova::Global
     std::cout << "ERROR: Invalid field. Allowed: firstName, lastName, city, birthday" << "\n";
   }
 }
+
+void ivantsova::cmdAddFriend(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 4) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id1(args[2]);
+  const std::string id2(args[3]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  if (!net->hasUser(id1) || !net->hasUser(id2)) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  if (net->addFriend(id1, id2)) {
+    std::cout << "Friends added!" << "\n";
+  } else {
+    std::cout << "ERROR: Already friends" << "\n";
+  }
+}
+
+void ivantsova::cmdRemoveFriend(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 4) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id1(args[2]);
+  const std::string id2(args[3]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  if (!net->hasUser(id1) || !net->hasUser(id2)) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  if (net->removeFriend(id1, id2)) {
+    std::cout << "Friends removed!" << "\n";
+  } else {
+    std::cout << "ERROR: Not friends" << "\n";
+  }
+}
+
+void ivantsova::cmdFriends(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 3) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id(args[2]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  ivantsova::User* u = net->getUser(id);
+  if (!u) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  ivantsova::MyVector< ivantsova::User* > friends;
+  net->getFriends(id, friends);
+
+  std::cout << "Friends of " << id << " (" << u->lastName << " " << u->firstName << ") in " << netName << ":" << "\n";
+  for (size_t i = 0; i < friends.size(); ++i) {
+    std::cout << "  " << friends[i]->id << " | " << friends[i]->lastName << " " << friends[i]->firstName
+      << " | " << friends[i]->city << "\n";
+  }
+  if (friends.size() == 0) {
+    std::cout << "  No friends" << "\n";
+  }
+}
+
+void ivantsova::cmdMutualFriends(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 4) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id1(args[2]);
+  const std::string id2(args[3]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  if (!net->hasUser(id1) || !net->hasUser(id2)) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  ivantsova::MyVector< ivantsova::User* > mutual;
+  net->getMutualFriends(id1, id2, mutual);
+
+  std::cout << "Mutual friends of " << id1 << " and " << id2 << " in " << netName << ":" << "\n";
+  for (size_t i = 0; i < mutual.size(); ++i) {
+    std::cout << "  " << mutual[i]->id << " | " << mutual[i]->lastName << " " << mutual[i]->firstName
+      << " | " << mutual[i]->city << "\n";
+  }
+  if (mutual.size() == 0) {
+    std::cout << "  No mutual friends" << "\n";
+  }
+}
