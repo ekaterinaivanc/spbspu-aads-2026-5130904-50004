@@ -262,7 +262,8 @@ void ivantsova::cmdUpdate(const MyVector< std::string >& args, ivantsova::Global
   }
 }
 
-void ivantsova::cmdAddFriend(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+void ivantsova::cmdAddFriend(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
 {
   if (args.size() < 4) {
     std::cout << "ERROR: invalid command" << "\n";
@@ -321,7 +322,8 @@ void ivantsova::cmdRemoveFriend(const MyVector< std::string >& args, ivantsova::
   }
 }
 
-void ivantsova::cmdFriends(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+void ivantsova::cmdFriends(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
 {
   if (args.size() < 3) {
     std::cout << "ERROR: invalid command" << "\n";
@@ -356,7 +358,8 @@ void ivantsova::cmdFriends(const MyVector< std::string >& args, ivantsova::Globa
   }
 }
 
-void ivantsova::cmdMutualFriends(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+void ivantsova::cmdMutualFriends(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
 {
   if (args.size() < 4) {
     std::cout << "ERROR: invalid command" << "\n";
@@ -388,5 +391,236 @@ void ivantsova::cmdMutualFriends(const MyVector< std::string >& args, ivantsova:
   }
   if (mutual.size() == 0) {
     std::cout << "  No mutual friends" << "\n";
+  }
+}
+
+void ivantsova::cmdRecommend(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry& globalRegistry,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 3) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id(args[2]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  if (!net->hasUser(id)) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  ivantsova::MyVector< std::string > otherNets;
+  networkManager.getAllNetworkNames(otherNets);
+
+  std::cout << "Friend recommendations for " << id << " in " << netName << " (from other networks):" << "\n";
+
+  int count = 0;
+  for (size_t i = 0; i < otherNets.size() && count < 5; ++i) {
+    if (otherNets[i] == netName) {
+      continue;
+    }
+
+    ivantsova::SocialNetwork* otherNet = networkManager.getNetwork(otherNets[i]);
+    if (!otherNet) {
+      continue;
+    }
+
+    ivantsova::User* otherUser = otherNet->getUser(id);
+    if (!otherUser) {
+      continue;
+    }
+
+    for (size_t j = 0; j < otherUser->friends.size() && count < 5; ++j) {
+      const std::string& friendId = otherUser->friends[j];
+      if (!net->hasUser(friendId) && !net->areFriends(id, friendId)) {
+        ivantsova::User* recommended = globalRegistry.findUser(friendId);
+        if (recommended) {
+          std::cout << "  " << ++count << ". " << friendId << " | " << recommended->lastName << " "
+            << recommended->firstName << " - friends in " << otherNets[i] << "\n";
+        }
+      }
+    }
+  }
+
+  if (count == 0) {
+    std::cout << "  No recommendations found" << "\n";
+  }
+}
+
+void ivantsova::cmdRecommendCity(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 3) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id(args[2]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  ivantsova::User* currentUser = net->getUser(id);
+  if (!currentUser) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  ivantsova::MyVector< ivantsova::User* > allUsers;
+  net->getAllUsers(allUsers);
+
+  std::cout << "Same city recommendations for " << id << " (" << currentUser->lastName << " "
+    << currentUser->firstName << ", " << currentUser->city << ") in " << netName << ":" << "\n";
+
+  int count = 0;
+  for (size_t i = 0; i < allUsers.size() && count < 5; ++i) {
+    ivantsova::User* u = allUsers[i];
+    if (u->id == id) {
+      continue;
+    }
+    if (net->areFriends(id, u->id)) {
+      continue;
+    }
+    if (u->city == currentUser->city) {
+      std::cout << "  " << ++count << ". " << u->id << " | " << u->lastName << " " << u->firstName << "\n";
+    }
+  }
+
+  if (count == 0) {
+    std::cout << "  No recommendations found" << "\n";
+  }
+}
+
+void ivantsova::cmdRecommendAge(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 4) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id(args[2]);
+  int ageDiff = std::atoi(args[3].c_str());
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  ivantsova::User* currentUser = net->getUser(id);
+  if (!currentUser) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  int currentAge = ivantsova::calculateAge(currentUser->birthday);
+
+  ivantsova::MyVector< ivantsova::User* > allUsers;
+  net->getAllUsers(allUsers);
+
+  std::cout << "Same age recommendations for " << id << " (" << currentUser->lastName << " "
+    << currentUser->firstName << ", " << currentAge << " y.o.) in " << netName << ":" << "\n";
+
+  int count = 0;
+  for (size_t i = 0; i < allUsers.size() && count < 5; ++i) {
+    ivantsova::User* u = allUsers[i];
+    if (u->id == id) {
+      continue;
+    }
+    if (net->areFriends(id, u->id)) {
+      continue;
+    }
+
+    int otherAge = ivantsova::calculateAge(u->birthday);
+    int diff = currentAge - otherAge;
+    if (diff < 0) diff = -diff;
+
+    if (diff <= ageDiff) {
+      std::cout << "  " << ++count << ". " << u->id << " | " << u->lastName << " " << u->firstName
+        << " (" << otherAge << " y.o.)" << "\n";
+    }
+  }
+
+  if (count == 0) {
+    std::cout << "  No recommendations found" << "\n";
+  }
+}
+
+void ivantsova::cmdRecommendSimilar(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 4) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName = args[1];
+  const std::string id = args[2];
+  int ageDiff = std::atoi(args[3].c_str());
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  ivantsova::User* currentUser = net->getUser(id);
+  if (!currentUser) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  int currentAge = ivantsova::calculateAge(currentUser->birthday);
+
+  ivantsova::MyVector< ivantsova::User* > allUsers;
+  net->getAllUsers(allUsers);
+
+  std::cout << "Recommended friends for " << id << " (" << currentUser->lastName << " " << currentUser->firstName
+    << ", " << currentUser->city << ", " << currentAge << " y.o.)" << " in " << netName << ":" << "\n";
+  std::cout << "Matches (same city + age ± " << ageDiff << " years):" << "\n";
+
+  int count = 0;
+  for (size_t i = 0; i < allUsers.size() && count < 5; ++i) {
+    ivantsova::User* u = allUsers[i];
+    if (u->id == id) {
+      continue;
+    }
+    if (net->areFriends(id, u->id)) {
+      continue;
+    }
+    if (u->city != currentUser->city) {
+      continue;
+    }
+
+    int otherAge = ivantsova::calculateAge(u->birthday);
+    int diff = currentAge - otherAge;
+    if (diff < 0) diff = -diff;
+
+    if (diff <= ageDiff) {
+      std::cout << "  " << ++count << ". " << u->id << " | " << u->lastName << " " << u->firstName
+        << " - " << u->city << ", " << otherAge << " y.o.";
+      if (diff == 0) {
+        std::cout << " (same age)" << "\n";
+      } else {
+        std::cout << " (diff: " << diff << " year(s))" << "\n";
+      }
+    }
+  }
+
+  if (count == 0) {
+    std::cout << "  No recommendations found" << "\n";
   }
 }
