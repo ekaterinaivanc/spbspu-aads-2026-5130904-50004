@@ -1,15 +1,17 @@
-#include "commands.hpp"
-#include "vector.hpp"
-#include "hashIters.hpp"
 #include <sstream>
 #include <algorithm>
 #include <limits>
+#include "commands.hpp"
+#include "vector.hpp"
+#include "hashIters.hpp"
 
-void ivantsova::printInvalid(std::ostream& out) {
+void ivantsova::printInvalid(std::ostream& out)
+{
   out << "<INVALID COMMAND>\n";
 }
 
-void ivantsova::cmdGraphs(std::istream&, std::ostream& out, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdGraphs(std::istream&, std::ostream& out, ivantsova::GraphSet& graphs)
+{
   ivantsova::Vector< std::string > names;
   for (auto it = graphs.begin(); it != graphs.end(); ++it) {
     names.pushBack((*it).first);
@@ -31,7 +33,8 @@ void ivantsova::cmdGraphs(std::istream&, std::ostream& out, ivantsova::GraphSet&
   }
 }
 
-void ivantsova::cmdVertexes(std::istream& in, std::ostream& out, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdVertexes(std::istream& in, std::ostream& out, ivantsova::GraphSet& graphs)
+{
   std::string name;
   in >> name;
   if (!graphs.has(name)) {
@@ -55,7 +58,8 @@ void ivantsova::cmdVertexes(std::istream& in, std::ostream& out, ivantsova::Grap
   }
 }
 
-void ivantsova::cmdOutbound(std::istream& in, std::ostream& out, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdOutbound(std::istream& in, std::ostream& out, ivantsova::GraphSet& graphs)
+{
   std::string gname, v;
   in >> gname >> v;
   if (!graphs.has(gname)) {
@@ -78,7 +82,8 @@ void ivantsova::cmdOutbound(std::istream& in, std::ostream& out, ivantsova::Grap
   }
 }
 
-void ivantsova::cmdInbound(std::istream& in, std::ostream& out, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdInbound(std::istream& in, std::ostream& out, ivantsova::GraphSet& graphs)
+{
   std::string gname, v;
   in >> gname >> v;
   if (!graphs.has(gname)) {
@@ -101,7 +106,8 @@ void ivantsova::cmdInbound(std::istream& in, std::ostream& out, ivantsova::Graph
   }
 }
 
-void ivantsova::cmdBind(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdBind(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs)
+{
   std::string gname, a, b;
   unsigned long long w;
   in >> gname >> a >> b >> w;
@@ -111,7 +117,8 @@ void ivantsova::cmdBind(std::istream& in, std::ostream&, ivantsova::GraphSet& gr
   graphs.get(gname).addEdge(a, b, w);
 }
 
-void ivantsova::cmdCut(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdCut(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs)
+{
   std::string gname, a, b;
   unsigned long long w;
   in >> gname >> a >> b >> w;
@@ -123,7 +130,8 @@ void ivantsova::cmdCut(std::istream& in, std::ostream&, ivantsova::GraphSet& gra
   }
 }
 
-void ivantsova::cmdCreate(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdCreate(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs)
+{
   std::string name;
   in >> name;
   if (graphs.has(name)) {
@@ -144,7 +152,8 @@ void ivantsova::cmdCreate(std::istream& in, std::ostream&, ivantsova::GraphSet& 
   graphs.add(name, g);
 }
 
-void ivantsova::cmdMerge(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdMerge(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs)
+{
   std::string newname, old1, old2;
   in >> newname >> old1 >> old2;
   if (graphs.has(newname)) {
@@ -159,7 +168,8 @@ void ivantsova::cmdMerge(std::istream& in, std::ostream&, ivantsova::GraphSet& g
   graphs.add(newname, graphs.get(old1).merge(graphs.get(old2)));
 }
 
-void ivantsova::cmdExtract(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs) {
+void ivantsova::cmdExtract(std::istream& in, std::ostream&, ivantsova::GraphSet& graphs)
+{
   std::string newname, oldname;
   in >> newname >> oldname;
   if (graphs.has(newname)) {

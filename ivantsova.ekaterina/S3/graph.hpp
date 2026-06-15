@@ -1,13 +1,14 @@
 #ifndef GRAPH_HPP
 #define GRAPH_HPP
 
+#include <string>
 #include "hashTable.hpp"
 #include "vector.hpp"
-#include <string>
 
 namespace ivantsova {
 
-  class Graph {
+  class Graph
+  {
   public:
     Graph();
 

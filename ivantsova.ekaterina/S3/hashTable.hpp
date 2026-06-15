@@ -1,57 +1,62 @@
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
 
-#include "vector.hpp"
-#include "../common/list.hpp"
 #include <utility>
 #include <stdexcept>
 #include <boost/hash2/sha1.hpp>
 #include <boost/hash2/get_integral_result.hpp>
+#include "vector.hpp"
+#include <list.hpp>
 
 namespace ivantsova {
 
-  template<typename Key, typename Value, typename Hash, typename Equal>
+  template< typename Key, typename Value, typename Hash, typename Equal >
   class HashIter;
 
-  template<typename Key, typename Value, typename Hash, typename Equal>
+  template< typename Key, typename Value, typename Hash, typename Equal >
   class HashConstIter;
 
 
   template< typename T >
-  struct Equal {
+  struct Equal
+  {
     bool operator()(const T& a, const T& b) const {
       return a == b;
     }
   };
 
-  struct BoostSHA1Hash {
+  struct BoostSHA1Hash
+  {
     size_t operator()(const std::string& s) const {
       boost::hash2::sha1_160 sha;
       sha.update(s.data(), s.size());
-      return boost::hash2::get_integral_result<size_t>(sha);
+      return boost::hash2::get_integral_result< size_t >(sha);
     }
   };
 
   template< typename T >
-  struct PairHash {
-    size_t operator()(const std::pair<T, T>& p) const {
+  struct PairHash
+  {
+    size_t operator()(const std::pair< T, T >& p) const {
       BoostSHA1Hash hasher;
       return hasher(p.first) ^ (hasher(p.second) << 1);
     }
   };
 
-  template<typename T>
-  struct PairEqual {
+  template< typename T >
+  struct PairEqual
+  {
     bool operator()(const std::pair< T, T >& a, const std::pair< T, T >& b) const {
       return a.first == b.first && a.second == b.second;
     }
   };
 
   template< typename Key, typename Value, typename Hash = BoostSHA1Hash, typename Equal = Equal< Key > >
-  class HashTable {
+  class HashTable
+  {
   public:
-    friend class HashIter<Key, Value, Hash, Equal>;
-    friend class HashConstIter<Key, Value, Hash, Equal>;
+    friend class HashIter< Key, Value, Hash, Equal >;
+    friend class HashConstIter< Key, Value, Hash, Equal >;
     explicit HashTable(size_t slots = 101);
     ~HashTable();
 
@@ -93,32 +98,38 @@ namespace ivantsova {
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-size_t ivantsova::HashTable< Key, Value, Hash, Equal >::getIndex(const Key& key) const {
+size_t ivantsova::HashTable< Key, Value, Hash, Equal >::getIndex(const Key& key) const
+{
   return hasher_(key) % data_.getSize();
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
 ivantsova::HashTable< Key, Value, Hash, Equal >::HashTable(size_t slots):
-  data_(slots), size_(0)
+ data_(slots),
+ size_(0)
 {}
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-ivantsova::HashTable< Key, Value, Hash, Equal >::~HashTable() {
+ivantsova::HashTable< Key, Value, Hash, Equal >::~HashTable()
+{
   clear();
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-size_t ivantsova::HashTable< Key, Value, Hash, Equal >::size() const noexcept {
+size_t ivantsova::HashTable< Key, Value, Hash, Equal >::size() const noexcept
+{
   return size_;
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-bool ivantsova::HashTable< Key, Value, Hash, Equal >::empty() const noexcept {
+bool ivantsova::HashTable< Key, Value, Hash, Equal >::empty() const noexcept
+{
   return size_ == 0;
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-void ivantsova::HashTable< Key, Value, Hash, Equal >::clear() noexcept {
+void ivantsova::HashTable< Key, Value, Hash, Equal >::clear() noexcept
+{
   for (size_t i = 0; i < data_.getSize(); ++i) {
     data_[i].clear();
   }
@@ -126,7 +137,8 @@ void ivantsova::HashTable< Key, Value, Hash, Equal >::clear() noexcept {
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-void ivantsova::HashTable< Key, Value, Hash, Equal >::swap(HashTable& other) noexcept {
+void ivantsova::HashTable< Key, Value, Hash, Equal >::swap(HashTable& other) noexcept
+{
   data_.swap(other.data_);
   std::swap(size_, other.size_);
   std::swap(hasher_, other.hasher_);
@@ -134,8 +146,12 @@ void ivantsova::HashTable< Key, Value, Hash, Equal >::swap(HashTable& other) noe
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-ivantsova::HashTable< Key, Value, Hash, Equal >::HashTable(const HashTable& other) :
-  data_(other.data_.getSize()), size_(0), hasher_(other.hasher_), equal_(other.equal_) {
+ivantsova::HashTable< Key, Value, Hash, Equal >::HashTable(const HashTable& other):
+ data_(other.data_.getSize()),
+ size_(0),
+ hasher_(other.hasher_),
+ equal_(other.equal_)
+{
   for (size_t i = 0; i < other.data_.getSize(); ++i) {
     for (auto it = other.data_[i].cbegin(); it != other.data_[i].cend(); ++it) {
       add((*it).first, (*it).second);
@@ -144,13 +160,18 @@ ivantsova::HashTable< Key, Value, Hash, Equal >::HashTable(const HashTable& othe
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-ivantsova::HashTable< Key, Value, Hash, Equal >::HashTable(HashTable&& other) noexcept :
-  data_(std::move(other.data_)), size_(other.size_), hasher_(std::move(other.hasher_)), equal_(std::move(other.equal_)) {
+ivantsova::HashTable< Key, Value, Hash, Equal >::HashTable(HashTable&& other) noexcept:
+ data_(std::move(other.data_)),
+ size_(other.size_),
+ hasher_(std::move(other.hasher_)),
+ equal_(std::move(other.equal_))
+{
   other.size_ = 0;
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-ivantsova::HashTable< Key, Value, Hash, Equal >& ivantsova::HashTable< Key, Value, Hash, Equal >::operator=(const HashTable& other) {
+ivantsova::HashTable< Key, Value, Hash, Equal >& ivantsova::HashTable< Key, Value, Hash, Equal >::operator=(const HashTable& other)
+{
   if (this != &other) {
     HashTable tmp(other);
     swap(tmp);
@@ -159,7 +180,8 @@ ivantsova::HashTable< Key, Value, Hash, Equal >& ivantsova::HashTable< Key, Valu
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-ivantsova::HashTable< Key, Value, Hash, Equal >& ivantsova::HashTable< Key, Value, Hash, Equal >::operator=(HashTable&& other) noexcept {
+ivantsova::HashTable< Key, Value, Hash, Equal >& ivantsova::HashTable< Key, Value, Hash, Equal >::operator=(HashTable&& other) noexcept
+{
   if (this != &other) {
     swap(other);
   }
@@ -167,7 +189,8 @@ ivantsova::HashTable< Key, Value, Hash, Equal >& ivantsova::HashTable< Key, Valu
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-void ivantsova::HashTable< Key, Value, Hash, Equal >::add(const Key& key, const Value& value) {
+void ivantsova::HashTable< Key, Value, Hash, Equal >::add(const Key& key, const Value& value)
+{
   size_t idx = getIndex(key);
   for (auto it = data_[idx].begin(); it != data_[idx].end(); ++it) {
     if (equal_((*it).first, key)) {
@@ -180,7 +203,8 @@ void ivantsova::HashTable< Key, Value, Hash, Equal >::add(const Key& key, const 
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-bool ivantsova::HashTable< Key, Value, Hash, Equal >::has(const Key& key) const noexcept {
+bool ivantsova::HashTable< Key, Value, Hash, Equal >::has(const Key& key) const noexcept
+{
   size_t idx = getIndex(key);
   for (auto it = data_[idx].cbegin(); it != data_[idx].cend(); ++it) {
     if (equal_((*it).first, key)) {
@@ -191,7 +215,8 @@ bool ivantsova::HashTable< Key, Value, Hash, Equal >::has(const Key& key) const 
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-Value& ivantsova::HashTable< Key, Value, Hash, Equal >::get(const Key& key) {
+Value& ivantsova::HashTable< Key, Value, Hash, Equal >::get(const Key& key)
+{
   size_t idx = getIndex(key);
   for (auto it = data_[idx].begin(); it != data_[idx].end(); ++it) {
     if (equal_((*it).first, key)) {
@@ -202,7 +227,8 @@ Value& ivantsova::HashTable< Key, Value, Hash, Equal >::get(const Key& key) {
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-const Value& ivantsova::HashTable< Key, Value, Hash, Equal >::get(const Key& key) const {
+const Value& ivantsova::HashTable< Key, Value, Hash, Equal >::get(const Key& key) const
+{
   size_t idx = getIndex(key);
   for (auto it = data_[idx].cbegin(); it != data_[idx].cend(); ++it) {
     if (equal_((*it).first, key)) {
@@ -213,7 +239,8 @@ const Value& ivantsova::HashTable< Key, Value, Hash, Equal >::get(const Key& key
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-Value ivantsova::HashTable< Key, Value, Hash, Equal >::drop(const Key& key) {
+Value ivantsova::HashTable< Key, Value, Hash, Equal >::drop(const Key& key)
+{
   size_t idx = getIndex(key);
   for (auto it = data_[idx].begin(); it != data_[idx].end(); ++it) {
     if (equal_((*it).first, key)) {
@@ -227,7 +254,8 @@ Value ivantsova::HashTable< Key, Value, Hash, Equal >::drop(const Key& key) {
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-void ivantsova::HashTable< Key, Value, Hash, Equal >::rehash(size_t new_slots) {
+void ivantsova::HashTable< Key, Value, Hash, Equal >::rehash(size_t new_slots)
+{
   if (new_slots == 0 || new_slots == data_.getSize()) {
     return;
   }
@@ -241,7 +269,8 @@ void ivantsova::HashTable< Key, Value, Hash, Equal >::rehash(size_t new_slots) {
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-typename ivantsova::HashTable< Key, Value, Hash, Equal >::HIter ivantsova::HashTable< Key, Value, Hash, Equal >::begin() {
+typename ivantsova::HashTable< Key, Value, Hash, Equal >::HIter ivantsova::HashTable< Key, Value, Hash, Equal >::begin()
+{
   for (size_t i = 0; i < data_.getSize(); ++i) {
     if (!data_[i].empty()) {
       return HIter(this, i, data_[i].begin());
@@ -251,12 +280,14 @@ typename ivantsova::HashTable< Key, Value, Hash, Equal >::HIter ivantsova::HashT
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-typename ivantsova::HashTable< Key, Value, Hash, Equal >::HIter ivantsova::HashTable< Key, Value, Hash, Equal >::end() {
+typename ivantsova::HashTable< Key, Value, Hash, Equal >::HIter ivantsova::HashTable< Key, Value, Hash, Equal >::end()
+{
   return HIter(this, data_.getSize(), LIter< std::pair< Key, Value > >());
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::begin() const {
+typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::begin() const
+{
   for (size_t i = 0; i < data_.getSize(); ++i) {
     if (!data_[i].empty()) {
       return HCIter(this, i, data_[i].cbegin());
@@ -266,17 +297,20 @@ typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::Hash
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::end() const {
-  return HCIter(this, data_.getSize(), LCIter<std::pair<Key, Value>>());
+typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::end() const
+{
+  return HCIter(this, data_.getSize(), LCIter< std::pair< Key, Value > >());
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::cbegin() const {
+typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::cbegin() const
+{
   return begin();
 }
 
 template< typename Key, typename Value, typename Hash, typename Equal >
-typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::cend() const {
+typename ivantsova::HashTable< Key, Value, Hash, Equal >::HCIter ivantsova::HashTable< Key, Value, Hash, Equal >::cend() const
+{
   return end();
 }
 

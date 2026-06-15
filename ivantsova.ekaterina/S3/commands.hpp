@@ -1,14 +1,14 @@
 #ifndef COMMANDS_HPP
 #define COMMANDS_HPP
 
-#include "hashTable.hpp"
-#include "graph.hpp"
 #include <iostream>
 #include <string>
+#include "hashTable.hpp"
+#include "graph.hpp"
 
 namespace ivantsova {
 
-  using GraphSet = HashTable<std::string, Graph>;
+  using GraphSet = HashTable< std::string, Graph >;
 
   void cmdGraphs(std::istream& in, std::ostream& out, GraphSet& graphs);
   void cmdVertexes(std::istream& in, std::ostream& out, GraphSet& graphs);

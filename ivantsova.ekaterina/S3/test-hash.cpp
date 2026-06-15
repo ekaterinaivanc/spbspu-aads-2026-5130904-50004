@@ -7,14 +7,14 @@ using namespace ivantsova;
 
 BOOST_AUTO_TEST_CASE(test_default_constructor)
 {
-  HashTable<std::string, int> ht(53);
+  HashTable< std::string, int > ht(53);
   BOOST_CHECK(ht.empty());
   BOOST_CHECK_EQUAL(ht.size(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(test_add_and_size)
 {
-  HashTable<std::string, int> ht(31);
+  HashTable< std::string, int > ht(31);
   ht.add("a", 5);
   BOOST_CHECK_EQUAL(ht.size(), 1);
   BOOST_CHECK(!ht.empty());
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(test_add_and_size)
 
 BOOST_AUTO_TEST_CASE(test_has)
 {
-  HashTable<std::string, int> ht(47);
+  HashTable< std::string, int > ht(47);
   ht.add("c", 10);
   ht.add("d", 20);
 
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_has)
 
 BOOST_AUTO_TEST_CASE(test_get)
 {
-  HashTable<std::string, int> ht(61);
+  HashTable< std::string, int > ht(61);
   ht.add("f", 15);
   ht.add("g", 25);
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_get)
 
 BOOST_AUTO_TEST_CASE(test_drop)
 {
-  HashTable<std::string, int> ht(73);
+  HashTable< std::string, int > ht(73);
   ht.add("first", 111);
   ht.add("second", 222);
 
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_drop)
 
 BOOST_AUTO_TEST_CASE(test_add_update_existing)
 {
-  HashTable<std::string, int> ht(83);
+  HashTable< std::string, int > ht(83);
   ht.add("x", 33);
   ht.add("x", 44);
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_add_update_existing)
 
 BOOST_AUTO_TEST_CASE(test_clear)
 {
-  HashTable<std::string, int> ht(97);
+  HashTable< std::string, int > ht(97);
   ht.add("p", 1);
   ht.add("q", 2);
   ht.add("r", 3);
@@ -85,11 +85,11 @@ BOOST_AUTO_TEST_CASE(test_clear)
 
 BOOST_AUTO_TEST_CASE(test_copy_constructor)
 {
-  HashTable<std::string, int> ht1(67);
+  HashTable< std::string, int > ht1(67);
   ht1.add("m", 7);
   ht1.add("n", 14);
 
-  HashTable<std::string, int> ht2 = ht1;
+  HashTable< std::string, int > ht2 = ht1;
 
   BOOST_CHECK_EQUAL(ht2.size(), 2);
   BOOST_CHECK(ht2.has("m"));
@@ -99,11 +99,11 @@ BOOST_AUTO_TEST_CASE(test_copy_constructor)
 
 BOOST_AUTO_TEST_CASE(test_move_constructor)
 {
-  HashTable<std::string, int> ht1(79);
+  HashTable< std::string, int > ht1(79);
   ht1.add("first", 50);
   ht1.add("second", 60);
 
-  HashTable<std::string, int> ht2 = std::move(ht1);
+  HashTable< std::string, int > ht2 = std::move(ht1);
 
   BOOST_CHECK_EQUAL(ht2.size(), 2);
   BOOST_CHECK(ht2.has("first"));
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_move_constructor)
 
 BOOST_AUTO_TEST_CASE(test_rehash)
 {
-  HashTable<std::string, int> ht(11);
+  HashTable< std::string, int > ht(11);
   ht.add("q", 1);
   ht.add("w", 2);
   ht.add("e", 3);
