@@ -215,7 +215,6 @@ namespace ivantsova {
         }
       }
     }
-
     size_t getCount() const
     {
       return count;
