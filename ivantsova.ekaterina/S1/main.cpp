@@ -1,34 +1,25 @@
-#include "../common/list.hpp"
 #include <iostream>
 #include <string>
 #include <utility>
-#include <sstream>
-
-using namespace ivantsova;
+#include <list.hpp>
 
 int main()
 {
   try
   {
-    List<std::pair<std::string, List< unsigned long long >>> sequences;
-    std::string line;
+    ivantsova::List< std::pair< std::string, ivantsova::List< unsigned long long > > > sequences;
+    std::string title;
 
-    while (std::getline(std::cin, line))
+    while (std::cin >> title)
     {
-      if (line.empty())
-      {
-        continue;
-      }
-      std::istringstream iss(line);
-      std::string name;
-      iss >> name;
-      List< unsigned long long > numbers;
+      ivantsova::List< unsigned long long > numbers;
       unsigned long long num;
-      while (iss >> num)
+      while (std::cin >> num)
       {
         numbers.push_back(num);
       }
-      sequences.push_back({name, std::move(numbers)});
+      std::cin.clear();
+      sequences.push_back({title, std::move(numbers)});
     }
 
     if (sequences.empty())
@@ -36,15 +27,12 @@ int main()
       std::cout << "0" << "\n";
       return 0;
     }
-    bool first = true;
-    for (auto it = sequences.cbegin(); it != sequences.cend(); ++it)
+    auto it = sequences.cbegin();
+    std::cout << it->first;
+    ++it;
+    for (; it != sequences.cend(); ++it)
     {
-      if (!first)
-      {
-        std::cout << ' ';
-      }
-      std::cout << it->first;
-      first = false;
+      std::cout << ' ' << it->first;
     }
     std::cout << "\n";
     size_t maxLen = 0;
@@ -55,10 +43,10 @@ int main()
         maxLen = it->second.size();
       }
     }
-    List<List< unsigned long long >> transposed;
+    ivantsova::List< ivantsova::List< unsigned long long > > transposed;
     for (size_t i = 0; i < maxLen; ++i)
     {
-      List< unsigned long long > newList;
+      ivantsova::List< unsigned long long > newList;
       for (auto it = sequences.cbegin(); it != sequences.cend(); ++it)
       {
         if (i < it->second.size())
@@ -81,16 +69,12 @@ int main()
         std::cout << "\n";
         continue;
       }
-
-      bool firstInRow = true;
-      for (auto elemIt = it->cbegin(); elemIt != it->cend(); ++elemIt)
+      auto elemIt = it->cbegin();
+      std::cout << *elemIt;
+      ++elemIt;
+      for (; elemIt != it->cend(); ++elemIt)
       {
-        if (!firstInRow)
-        {
-          std::cout << ' ';
-        }
-        std::cout << *elemIt;
-        firstInRow = false;
+        std::cout << ' ' << *elemIt;
       }
       std::cout << "\n";
     }
@@ -99,27 +83,27 @@ int main()
       std::cout << "0\n";
       return 0;
     }
-    List<int> sums;
+    ivantsova::List< unsigned long long > sums;
     for (auto it = transposed.cbegin(); it != transposed.cend(); ++it)
     {
       unsigned long long total = 0;
       for (auto elemIt = it->cbegin(); elemIt != it->cend(); ++elemIt)
       {
-        sum(total, *elemIt);
+        ivantsova::sum(total, *elemIt);
       }
       sums.push_back(total);
     }
-    first = true;
-    for (auto it = sums.cbegin(); it != sums.cend(); ++it)
+    if (!sums.empty())
     {
-      if (!first)
-      {
-        std::cout << ' ';
-      }
+      auto it = sums.cbegin();
       std::cout << *it;
-      first = false;
+      ++it;
+      for (; it != sums.cend(); ++it)
+      {
+        std::cout << ' ' << *it;
+      }
+      std::cout << "\n";
     }
-    std::cout << "\n";
     return 0;
   }
   catch (const std::exception& e)
