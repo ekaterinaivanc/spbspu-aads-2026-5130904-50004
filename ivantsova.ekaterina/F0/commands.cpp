@@ -203,3 +203,61 @@ void ivantsova::cmdDelete(const MyVector< std::string >& args, ivantsova::Global
   globalRegistry.unregisterUser(id);
   std::cout << "User deleted" << "\n";
 }
+
+void ivantsova::cmdShow(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry& globalRegistry,
+  ivantsova::NetworkManager&)
+{
+  if (args.size() < 2) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string id(args[1]);
+
+  ivantsova::User* u = globalRegistry.findUser(id);
+  if (!u) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  std::cout << "ID: " << u->id << ", Last name: " << u->lastName << ", First name: " << u->firstName
+    << ", City: " << u->city << ", Birthday: " << u->birthday << ", Friends: " << u->friends.size() << "\n";
+}
+
+void ivantsova::cmdUpdate(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry& globalRegistry, ivantsova::NetworkManager&)
+{
+  if (args.size() < 4) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string id(args[1]);
+  const std::string field(args[2]);
+  const std::string value(args[3]);
+
+  ivantsova::User* u = globalRegistry.findUser(id);
+  if (!u) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  if (field == "firstName") {
+    u->firstName = value;
+    std::cout << "First name updated!" << "\n";
+  } else if (field == "lastName") {
+    u->lastName = value;
+    std::cout << "Last name updated!" << "\n";
+  } else if (field == "city") {
+    u->city = value;
+    std::cout << "City updated!" << "\n";
+  } else if (field == "birthday") {
+    if (!ivantsova::isValidBirthday(value)) {
+      std::cout << "ERROR: Invalid birthday format" << "\n";
+      return;
+    }
+    u->birthday = value;
+    std::cout << "Birthday updated!" << "\n";
+  } else {
+    std::cout << "ERROR: Invalid field. Allowed: firstName, lastName, city, birthday" << "\n";
+  }
+}
