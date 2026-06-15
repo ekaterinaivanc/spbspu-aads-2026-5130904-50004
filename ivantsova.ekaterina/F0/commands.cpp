@@ -85,3 +85,61 @@ void ivantsova::CommandRegistry::execute(const char* input, ivantsova::GlobalUse
   }
   cmd->handler(args, globalRegistry, networkManager);
 }
+
+void ivantsova::CommandRegistry::printHelp()
+{
+  ivantsova::MyVector< std::string > keys;
+  commands.getAllKeys(keys);
+
+  std::cout << "\n=== Available commands ===" << "\n";
+  for (size_t i = 0; i < keys.size(); ++i) {
+    Command* cmd = commands.find(keys[i]);
+    if (cmd) {
+      std::cout << "  " << cmd->syntax << "\n";
+    }
+  }
+  std::cout << "\n";
+}
+
+void ivantsova::cmdAdd(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry& globalRegistry,
+  ivantsova::NetworkManager&)
+{
+  if (args.size() < 6) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string id(args[1]);
+  const std::string ln(args[2]);
+  const std::string fn(args[3]);
+  const std::string city(args[4]);
+  const std::string bd(args[5]);
+
+  if (!ivantsova::isValidBirthday(bd)) {
+    std::cout << "ERROR: Invalid birthday format" << "\n";
+    return;
+  }
+
+  ivantsova::User newUser(id, ln, fn, city, bd);
+  if (globalRegistry.registerUser(newUser)) {
+    std::cout << "User added!" << "\n";
+  } else {
+    std::cout << "ERROR: This ID is busy" << "\n";
+  }
+}
+
+void ivantsova::cmdAddNet(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 2) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+
+  if (networkManager.addNetwork(netName)) {
+    std::cout << "Network '" << netName << "' created" << "\n";
+  } else {
+    std::cout << "ERROR: Social network '" << netName << "' already exists" << "\n";
+  }
+}
