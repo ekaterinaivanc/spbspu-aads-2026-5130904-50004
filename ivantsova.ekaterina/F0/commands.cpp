@@ -674,3 +674,78 @@ void ivantsova::cmdImport(const MyVector< std::string >& args, ivantsova::Global
       << duplicates << " duplicate skipped)" << "\n";
   }
 }
+
+void ivantsova::cmdClear(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 2) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  if (net->getUserCount() == 0) {
+    std::cout << "Network is already empty" << "\n";
+  } else {
+    net->clear();
+    std::cout << "Social network cleared!" << "\n";
+  }
+}
+
+void ivantsova::cmdDeleteNet(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 2) {
+    std::cout << "ERROR: invalid command>" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+
+  if (!networkManager.networkExists(netName)) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  networkManager.removeNetwork(netName);
+  std::cout << "Social network deleted" << "\n";
+}
+
+void ivantsova::cmdExit(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager&)
+{
+  (void)args;
+  std::cout << "Goodbye!" << "\n";
+  std::exit(0);
+}
+
+void ivantsova::cmdHelp(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&, ivantsova::NetworkManager&)
+{
+  (void)args;
+  std::cout << "\n=== Available commands ===" << "\n";
+  std::cout << "  add <id> <lastName> <firstName> <city> <birthday>" << "\n";
+  std::cout << "  addNet <network>" << "\n";
+  std::cout << "  register <network> <id>" << "\n";
+  std::cout << "  delete <id>" << "\n";
+  std::cout << "  show <id>" << "\n";
+  std::cout << "  update <id> <field> <value>" << "\n";
+  std::cout << "  add-friend <network> <id1> <id2>" << "\n";
+  std::cout << "  remove-friend <network> <id1> <id2>" << "\n";
+  std::cout << "  friends <network> <id>" << "\n";
+  std::cout << "  mutual-friends <network> <id1> <id2>" << "\n";
+  std::cout << "  recommend <network> <id>" << "\n";
+  std::cout << "  recommend-city <network> <id>" << "\n";
+  std::cout << "  recommend-age <network> <id> <ageDiff>" << "\n";
+  std::cout << "  recommend-similar <network> <id> <ageDiff>" << "\n";
+  std::cout << "  export <network> <filename>" << "\n";
+  std::cout << "  import <filename> <network>" << "\n";
+  std::cout << "  clear <network>" << "\n";
+  std::cout << "  deleteNet <network>" << "\n";
+  std::cout << "  help" << "\n";
+  std::cout << "  exit" << "\n";
+  std::cout << "\n";
+}
