@@ -61,6 +61,9 @@ int main()
   while (true) {
     std::cout << "> ";
     std::cin.getline(input, ivantsova::MAX_COMMAND_LEN);
+    if (!std::cin) {
+      break;
+    }
     if (input[0] == '\0') {
       continue;
     }
