@@ -624,3 +624,53 @@ void ivantsova::cmdRecommendSimilar(const MyVector< std::string >& args, ivantso
     std::cout << "  No recommendations found" << "\n";
   }
 }
+
+void ivantsova::cmdExport(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry&,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 3) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName = args[1];
+  const std::string filename = args[2];
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  if (net->exportToFile(filename)) {
+    std::cout << "Exported to " << filename << " (" << net->getUserCount() << " users saved)" << "\n";
+  } else {
+    std::cout << "ERROR: Cannot create file" << "\n";
+  }
+}
+
+void ivantsova::cmdImport(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry& globalRegistry,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 3) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string filename(args[1]);
+  const std::string netName(args[2]);
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+  int duplicates = 0;
+  int result = net->importFromFile(filename, globalRegistry, duplicates);
+  if (result == -1) {
+    std::cout << "ERROR: File not found" << "\n";
+  } else {
+    std::cout << "Imported from " << filename << " (" << result << " users added, "
+      << duplicates << " duplicate skipped)" << "\n";
+  }
+}
