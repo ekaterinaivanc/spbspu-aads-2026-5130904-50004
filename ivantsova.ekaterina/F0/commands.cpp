@@ -143,3 +143,63 @@ void ivantsova::cmdAddNet(const MyVector< std::string >& args, ivantsova::Global
     std::cout << "ERROR: Social network '" << netName << "' already exists" << "\n";
   }
 }
+
+void ivantsova::cmdRegister(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry& globalRegistry,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 3) {
+    std::cout << "ERROR: invalid command" << "\n";
+    return;
+  }
+
+  const std::string netName(args[1]);
+  const std::string id(args[2]);
+
+  ivantsova::User* user = globalRegistry.findUser(id);
+  if (!user) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  ivantsova::SocialNetwork* net = networkManager.getNetwork(netName);
+  if (!net) {
+    std::cout << "ERROR: Network not found" << "\n";
+    return;
+  }
+
+  if (net->addUser(user)) {
+    std::cout << "User registered!" << "\n";
+  } else {
+    std::cout << "ERROR: User already in this network" << "\n";
+  }
+}
+
+void ivantsova::cmdDelete(const MyVector< std::string >& args, ivantsova::GlobalUserRegistry& globalRegistry,
+  ivantsova::NetworkManager& networkManager)
+{
+  if (args.size() < 2) {
+    std::cout << "ERROR: invalid command>" << "\n";
+    return;
+  }
+
+  const std::string id(args[1]);
+
+  ivantsova::User* user = globalRegistry.findUser(id);
+  if (!user) {
+    std::cout << "ERROR: User not found" << "\n";
+    return;
+  }
+
+  ivantsova::MyVector< std::string > netNames;
+  networkManager.getAllNetworkNames(netNames);
+
+  for (size_t i = 0; i < netNames.size(); ++i) {
+    ivantsova::SocialNetwork* net = networkManager.getNetwork(netNames[i]);
+    if (net && net->hasUser(id)) {
+      net->removeUser(id);
+    }
+  }
+
+  globalRegistry.unregisterUser(id);
+  std::cout << "User deleted" << "\n";
+}
