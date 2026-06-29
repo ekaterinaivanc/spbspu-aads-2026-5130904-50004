@@ -20,7 +20,7 @@ bool ivantsova::SocialNetwork::addUser(User* user)
   if (!user) {
     return false;
   }
-  if (networkUsers.find(user->id) != nullptr) {
+  if (networkUsers.findExists(user->id)) {
     return false;
   }
   return networkUsers.insert(user->id, user);
@@ -33,24 +33,24 @@ bool ivantsova::SocialNetwork::removeUser(const std::string& id)
 
 bool ivantsova::SocialNetwork::hasUser(const std::string& id) const
 {
-  return networkUsers.find(id) != nullptr;
+  return networkUsers.findExists(id);
 }
 
 ivantsova::User* ivantsova::SocialNetwork::getUser(const std::string& id)
 {
-  User** res = networkUsers.find(id);
-  return res ? *res : nullptr;
+  auto it = networkUsers.find(id);
+  return (it != networkUsers.end()) ? it->value : nullptr;
 }
 
 bool ivantsova::SocialNetwork::addFriend(const std::string& id1, const std::string& id2)
 {
-  User** u1Ptr = networkUsers.find(id1);
-  User** u2Ptr = networkUsers.find(id2);
-  if (!u1Ptr || !u2Ptr) {
+  auto it1 = networkUsers.find(id1);
+  auto it2 = networkUsers.find(id2);
+  if (it1 == networkUsers.end() || it2 == networkUsers.end()) {
     return false;
   }
-  User* u1 = *u1Ptr;
-  User* u2 = *u2Ptr;
+  User* u1 = it1->value;
+  User* u2 = it2->value;
   for (size_t i = 0; i < u1->friends.size(); ++i) {
     if (u1->friends[i] == id2) {
       return false;
@@ -63,13 +63,13 @@ bool ivantsova::SocialNetwork::addFriend(const std::string& id1, const std::stri
 
 bool ivantsova::SocialNetwork::removeFriend(const std::string& id1, const std::string& id2)
 {
-  User** u1Ptr = networkUsers.find(id1);
-  User** u2Ptr = networkUsers.find(id2);
-  if (!u1Ptr || !u2Ptr) {
+  auto it1 = networkUsers.find(id1);
+  auto it2 = networkUsers.find(id2);
+  if (it1 == networkUsers.end() || it2 == networkUsers.end()) {
     return false;
   }
-  User* u1 = *u1Ptr;
-  User* u2 = *u2Ptr;
+  User* u1 = it1->value;
+  User* u2 = it2->value;
   u1->friends.remove(id2);
   u2->friends.remove(id1);
   return true;
@@ -77,11 +77,11 @@ bool ivantsova::SocialNetwork::removeFriend(const std::string& id1, const std::s
 
 bool ivantsova::SocialNetwork::areFriends(const std::string& id1, const std::string& id2) const
 {
-  auto u1Ptr = networkUsers.find(id1);
-  if (!u1Ptr) {
+  auto it1 = networkUsers.find(id1);
+  if (it1 == networkUsers.end()) {
     return false;
   }
-  User* u1 = *u1Ptr;
+  User* u1 = it1->value;
   for (size_t i = 0; i < u1->friends.size(); ++i) {
     if (u1->friends[i] == id2) {
       return true;
@@ -93,15 +93,15 @@ bool ivantsova::SocialNetwork::areFriends(const std::string& id1, const std::str
 void ivantsova::SocialNetwork::getFriends(const std::string& id, ivantsova::MyVector< User* >& result)
 {
   result.clear();
-  User** uPtr = networkUsers.find(id);
-  if (!uPtr) {
+  auto it = networkUsers.find(id);
+  if (it == networkUsers.end()) {
     return;
   }
-  User* u = *uPtr;
+  User* u = it->value;
   for (size_t i = 0; i < u->friends.size(); ++i) {
-    User** friendPtr = networkUsers.find(u->friends[i]);
-    if (friendPtr) {
-      result.push_back(*friendPtr);
+    auto fit = networkUsers.find(u->friends[i]);
+    if (fit != networkUsers.end()) {
+      result.push_back(fit->value);
     }
   }
 }
@@ -109,21 +109,20 @@ void ivantsova::SocialNetwork::getFriends(const std::string& id, ivantsova::MyVe
 void ivantsova::SocialNetwork::getMutualFriends(const std::string& id1, const std::string& id2, ivantsova::MyVector< User* >& result)
 {
   result.clear();
-  User** u1Ptr = networkUsers.find(id1);
-  User** u2Ptr = networkUsers.find(id2);
-  if (!u1Ptr || !u2Ptr) {
+  auto it1 = networkUsers.find(id1);
+  auto it2 = networkUsers.find(id2);
+  if (it1 == networkUsers.end() || it2 == networkUsers.end()) {
     return;
   }
-  User* u1 = *u1Ptr;
-  User* u2 = *u2Ptr;
+  User* u1 = it1->value;
+  User* u2 = it2->value;
   for (size_t i = 0; i < u1->friends.size(); ++i) {
     for (size_t j = 0; j < u2->friends.size(); ++j) {
       if (u1->friends[i] == u2->friends[j]) {
-        User** mutualPtr = networkUsers.find(u1->friends[i]);
-        if (mutualPtr) {
-          result.push_back(*mutualPtr);
+        auto mit = networkUsers.find(u1->friends[i]);
+        if (mit != networkUsers.end()) {
+          result.push_back(mit->value);
         }
-        break;
       }
     }
   }
@@ -135,9 +134,9 @@ void ivantsova::SocialNetwork::getAllUsers(ivantsova::MyVector< User* >& result)
   ivantsova::MyVector< std::string > keys;
   networkUsers.getAllKeys(keys);
   for (size_t i = 0; i < keys.size(); ++i) {
-    User** uPtr = networkUsers.find(keys[i]);
-    if (uPtr) {
-      result.push_back(*uPtr);
+    auto it = networkUsers.find(keys[i]);
+    if (it != networkUsers.end()) {
+      result.push_back(it->value);
     }
   }
 }
@@ -256,7 +255,7 @@ int ivantsova::SocialNetwork::importFromFile(const std::string& filename, Global
       existing = globalRegistry.findUser(id);
     }
 
-    if (networkUsers.find(id) != nullptr) {
+    if (networkUsers.findExists(id)) {
       ++duplicates;
       continue;
     }

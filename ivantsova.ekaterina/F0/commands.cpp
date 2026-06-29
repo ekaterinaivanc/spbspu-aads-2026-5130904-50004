@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <cctype>
 #include "commands.hpp"
 #include "utils.hpp"
 
@@ -21,13 +22,13 @@ bool ivantsova::Command::operator==(const Command& other) const
 }
 
 void ivantsova::CommandRegistry::registerCommand(const std::string& name, ivantsova::CommandHandler handler,
-  int minArgs, const std::string& syntax)
+  size_t minArgs, const std::string& syntax)
 {
   Command cmd(name, handler, minArgs, syntax);
   commands.insert(name, cmd);
 }
 
-ivantsova::Command* ivantsova::CommandRegistry::findCommand(const std::string& name)
+ivantsova::DoubleHashTable< std::string, ivantsova::Command >::iterator  ivantsova::CommandRegistry::findCommand(const std::string& name)
 {
   return commands.find(name);
 }
@@ -36,54 +37,38 @@ void ivantsova::CommandRegistry::execute(const char* input, ivantsova::GlobalUse
   ivantsova::NetworkManager& networkManager)
 {
   std::string line(input);
-  size_t start = 0;
-  while (start < line.size() && (line[start] == ' ' || line[start] == '\t' || line[start] == '\n' || line[start] == '\r')) {
-    ++start;
-  }
-  if (start == line.size()) {
+  size_t start = line.find_first_not_of(" \t\n\r");
+  if (start == std::string::npos) {
     return;
   }
-  size_t end = line.size() - 1;
-  while (end > start && (line[end] == ' ' || line[end] == '\t' || line[end] == '\n' || line[end] == '\r')) {
-    --end;
-  }
-  std::string trimmed = "";
-  for (size_t i = start; i <= end; ++i) {
-    trimmed += line[i];
-  }
+  size_t end = line.find_last_not_of(" \t\n\r");
+  line = line.substr(start, end - start + 1);
+
   ivantsova::MyVector< std::string > args;
   size_t pos = 0;
-  while (pos < trimmed.size()) {
-    while (pos < trimmed.size() && trimmed[pos] == ' ') {
-      ++pos;
-    }
-    if (pos >= trimmed.size()) {
+  while (pos < line.size()) {
+    size_t space = line.find(' ', pos);
+    if (space == std::string::npos) {
+      args.push_back(line.substr(pos));
       break;
     }
-    size_t endPos = pos;
-    while (endPos < trimmed.size() && trimmed[endPos] != ' ') {
-      ++endPos;
+    args.push_back(line.substr(pos, space - pos));
+    pos = space + 1;
+    while (pos < line.size() && line[pos] == ' ') {
+      ++pos;
     }
-    std::string arg = "";
-    for (size_t i = pos; i < endPos; ++i) {
-      arg += trimmed[i];
-    }
-    args.push_back(arg);
-    pos = endPos;
   }
   if (args.size() == 0) {
     return;
   }
-  Command* cmd = findCommand(args[0]);
-  if (!cmd) {
-    std::cout << "Unknown command. Type 'help'" << "\n";
-    return;
+  auto it = findCommand(args[0]);
+  if (it == commands.end()) {
+    throw std::runtime_error("Unknown command. Type 'help'");
   }
-  if (args.size() < static_cast< size_t >(cmd->minArgs)) {
-    std::cout << "ERROR: Not enough arguments. Usage: " << cmd->syntax << "\n";
-    return;
+  if (args.size() < static_cast< size_t >(it->value.minArgs)) {
+    throw std::runtime_error("ERROR: Not enough arguments. Usage: " + it->value.syntax);
   }
-  cmd->handler(args, globalRegistry, networkManager);
+  it->value.handler(args, globalRegistry, networkManager);
 }
 
 void ivantsova::CommandRegistry::printHelp()
@@ -93,9 +78,9 @@ void ivantsova::CommandRegistry::printHelp()
 
   std::cout << "\n=== Available commands ===" << "\n";
   for (size_t i = 0; i < keys.size(); ++i) {
-    Command* cmd = commands.find(keys[i]);
-    if (cmd) {
-      std::cout << "  " << cmd->syntax << "\n";
+    auto it = commands.find(keys[i]);
+    if (it != commands.end()) {
+      std::cout << "  " << it->value.syntax << "\n";
     }
   }
   std::cout << "\n";
@@ -350,8 +335,7 @@ void ivantsova::cmdFriends(const MyVector< std::string >& args, ivantsova::Globa
 
   std::cout << "Friends of " << id << " (" << u->lastName << " " << u->firstName << ") in " << netName << ":" << "\n";
   for (size_t i = 0; i < friends.size(); ++i) {
-    std::cout << "  " << friends[i]->id << " | " << friends[i]->lastName << " " << friends[i]->firstName
-      << " | " << friends[i]->city << "\n";
+    std::cout << "  " << *friends[i] << "\n";
   }
   if (friends.size() == 0) {
     std::cout << "  No friends" << "\n";
@@ -386,8 +370,7 @@ void ivantsova::cmdMutualFriends(const MyVector< std::string >& args, ivantsova:
 
   std::cout << "Mutual friends of " << id1 << " and " << id2 << " in " << netName << ":" << "\n";
   for (size_t i = 0; i < mutual.size(); ++i) {
-    std::cout << "  " << mutual[i]->id << " | " << mutual[i]->lastName << " " << mutual[i]->firstName
-      << " | " << mutual[i]->city << "\n";
+    std::cout << "  " << *mutual[i] << "\n";
   }
   if (mutual.size() == 0) {
     std::cout << "  No mutual friends" << "\n";

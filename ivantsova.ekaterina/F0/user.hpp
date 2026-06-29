@@ -2,6 +2,7 @@
 #define USER_HPP
 
 #include <string>
+#include <iostream>
 #include "vector.hpp"
 #include "hash_table.hpp"
 
@@ -20,7 +21,10 @@ namespace ivantsova {
     User(const std::string& uid, const std::string& ln,
       const std::string& fn, const std::string& c, const std::string& bd);
     bool operator==(const User& other) const;
+    friend std::ostream& operator<<(std::ostream& os, const User& user);
   };
+
+  std::ostream& operator<<(std::ostream& os, const User& user);
 
   class GlobalUserRegistry
   {

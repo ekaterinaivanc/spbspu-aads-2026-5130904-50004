@@ -41,25 +41,32 @@ namespace ivantsova {
       Key key;
       Value value;
       State state;
+
       Entry():
        state(EMPTY)
       {}
+
+      Entry(const Key& k, const Value& v):
+       key(k),
+       value(v),
+       state(OCCUPIED)
+      {}
+
     };
 
-    Entry* table;
-    size_t size;
+    MyVector< Entry > table;
     size_t count;
     Hash hasher;
     Equal equal;
 
     size_t hash1(const Key& key) const
     {
-      return hasher(key) % (size);
+      return hasher(key) % table.size();
     }
 
     size_t hash2(const Key& key) const
     {
-      return 1 + (hasher(key) % (size - 1));
+      return 1 + (hasher(key) % (table.size() - 1));
     }
 
     size_t findIndex(const Key& key) const
@@ -68,6 +75,7 @@ namespace ivantsova {
       size_t step = hash2(key);
       size_t start = idx;
       size_t i = 0;
+      size_t size = table.size();
 
       while (table[idx].state != EMPTY && i < size) {
         if (table[idx].state == OCCUPIED && equal(table[idx].key, key)) {
@@ -94,69 +102,67 @@ namespace ivantsova {
 
     size_t nextPrime(size_t n) const
     {
-      while (!isPrime(n)) {
+      if (n <= 2) {
+        return 2;
+      }
+      if (n % 2 == 0) {
         ++n;
+      }
+      while (!isPrime(n)) {
+        n += 2;
       }
       return n;
     }
 
     void rehash()
     {
-      size_t newSize = nextPrime(size * 2);
-      Entry* oldTable = table;
-      size_t oldSize = size;
-
-      table = new Entry[newSize];
-      size = newSize;
-      count = 0;
-
-      for (size_t i = 0; i < oldSize; ++i) {
-        if (oldTable[i].state == OCCUPIED) {
-          insert(oldTable[i].key, oldTable[i].value);
+      size_t newSize = nextPrime(table.size() * 2);
+      DoubleHashTable newTable(newSize);
+      newTable.hasher = hasher;
+      newTable.equal = equal;
+      for (size_t i = 0; i < table.size(); ++i) {
+        if (table[i].state == OCCUPIED) {
+          newTable.insert(table[i].key, table[i].value);
         }
       }
-      delete[] oldTable;
+      swap(newTable);
     }
 
   public:
     DoubleHashTable(size_t initialSize = DEFAULT_TABLE_SIZE):
-     size(nextPrime(initialSize)),
      count(0)
     {
-      table = new Entry[size];
+      size_t size = nextPrime(initialSize);
+      for (size_t i = 0; i < size; ++i) {
+        table.push_back(Entry());
+      }
     }
 
     DoubleHashTable(const DoubleHashTable& other):
-     size(other.size),
      count(other.count),
      hasher(other.hasher),
      equal(other.equal)
     {
-      table = new Entry[size];
-      for (size_t i = 0; i < size; ++i) {
-        table[i] = other.table[i];
+      for (size_t i = 0; i < other.table.size(); ++i) {
+        table.push_back(other.table[i]);
       }
+    }
+
+    void swap(DoubleHashTable& other)
+    {
+      std::swap(table, other.table);
+      std::swap(count, other.count);
+      std::swap(hasher, other.hasher);
+      std::swap(equal, other.equal);
     }
 
     DoubleHashTable& operator=(const DoubleHashTable& other)
     {
-      if (this != &other) {
-        delete[] table;
-        size = other.size;
-        count = other.count;
-        hasher = other.hasher;
-        equal = other.equal;
-        table = new Entry[size];
-        for (size_t i = 0; i < size; ++i) {
-          table[i] = other.table[i];
-        }
+      if (this != std::addressof(other)) {
+        DoubleHashTable tmp(other);
+        swap(tmp);
       }
       return *this;
-    }
-
-    ~DoubleHashTable()
-    {
-      delete[] table;
     }
 
     bool insert(const Key& key, const Value& value)
@@ -164,7 +170,7 @@ namespace ivantsova {
       if (findIndex(key) != static_cast< size_t >(-1)) {
         return false;
       }
-      if (static_cast< double >(count) / size > LOAD_FACTOR_LIMIT) {
+      if (static_cast< double >(count) / table.size() > LOAD_FACTOR_LIMIT) {
         rehash();
       }
 
@@ -172,27 +178,173 @@ namespace ivantsova {
       size_t step = hash2(key);
       size_t start = idx;
       size_t i = 0;
+      size_t size = table.size();
       while (table[idx].state == OCCUPIED && i < size) {
         ++i;
         idx = (start + i * step) % size;
       }
-      table[idx].key = key;
-      table[idx].value = value;
-      table[idx].state = OCCUPIED;
+      table[idx] = Entry(key, value);
       ++count;
       return true;
     }
 
-    Value* find(const Key& key)
+    struct iterator
     {
-      size_t idx = findIndex(key);
-      return (idx != static_cast< size_t >(-1)) ? &table[idx].value : nullptr;
+      Entry* ptr;
+      Entry* endPtr;
+
+      iterator(Entry* p = nullptr, Entry* end = nullptr):
+       ptr(p),
+       endPtr(end)
+      {
+        while (ptr != endPtr && (ptr->state == EMPTY || ptr->state == DELETED)) {
+          ++ptr;
+        }
+      }
+
+      Entry& operator*()
+      {
+        return *ptr;
+      }
+
+      Entry* operator->()
+      {
+        return ptr;
+      }
+
+      iterator& operator++()
+      {
+        ++ptr;
+        while (ptr != endPtr && (ptr->state == EMPTY || ptr->state == DELETED)) {
+          ++ptr;
+        }
+        return *this;
+      }
+
+      iterator operator++(int)
+      {
+        iterator tmp = *this;
+        ++(*this);
+        return tmp;
+      }
+
+      bool operator==(const iterator& other) const
+      {
+        return ptr == other.ptr;
+      }
+
+      bool operator!=(const iterator& other) const
+      {
+        return ptr != other.ptr;
+      }
+    };
+
+    struct const_iterator
+    {
+      const Entry* ptr;
+      const Entry* endPtr;
+
+      const_iterator(const Entry* p = nullptr, const Entry* end = nullptr):
+       ptr(p),
+       endPtr(end)
+      {}
+
+      const Entry& operator*() const
+      {
+        return *ptr;
+      }
+
+      const Entry* operator->() const
+      {
+        return ptr;
+      }
+
+      const_iterator& operator++()
+      {
+        ++ptr;
+        while (ptr != endPtr && (ptr->state == EMPTY || ptr->state == DELETED)) {
+          ++ptr;
+        }
+        return *this;
+      }
+
+      const_iterator operator++(int)
+      {
+        const_iterator tmp = *this;
+        ++(*this);
+        return tmp;
+      }
+
+      bool operator==(const const_iterator& other) const
+      {
+        return ptr == other.ptr;
+      }
+
+      bool operator!=(const const_iterator& other) const
+      {
+        return ptr != other.ptr;
+      }
+    };
+
+    iterator begin()
+    {
+      Entry* first = table.begin();
+      Entry* last = table.end();
+      while (first != last && (first->state == EMPTY || first->state == DELETED)) {
+        ++first;
+      }
+      return iterator(first, last);
     }
 
-    const Value* find(const Key& key) const
+    iterator end()
+    {
+      return iterator(table.end(), table.end());
+    }
+
+    const_iterator begin() const
+    {
+      const Entry* first = table.begin();
+      const Entry* last = table.end();
+      while (first != last && (first->state == EMPTY || first->state == DELETED)) {
+        ++first;
+      }
+      return const_iterator(first, last);
+    }
+
+    const_iterator end() const
+    {
+      return const_iterator(table.end(), table.end());
+    }
+
+    iterator find(const Key& key)
     {
       size_t idx = findIndex(key);
-      return (idx != static_cast< size_t >(-1)) ? &table[idx].value : nullptr;
+      if (idx != static_cast< size_t >(-1)) {
+        auto it = table.begin();
+        for (size_t i = 0; i < idx; ++i) {
+          ++it;
+        }
+        return iterator(it);
+      }
+      return end();
+    }
+
+    const_iterator find(const Key& key) const
+    {
+      size_t idx = findIndex(key);
+      if (idx != static_cast< size_t >(-1)) {
+        auto it = table.begin();
+        for (size_t i = 0; i < idx; ++i) {
+          ++it;
+        }
+        return const_iterator(it);
+      }
+      return end();
+    }
+
+    bool findExists(const Key& key) const
+    {
+      return findIndex(key) != static_cast< size_t >(-1);
     }
 
     bool remove(const Key& key)
@@ -209,21 +361,30 @@ namespace ivantsova {
     void getAllKeys(MyVector< Key >& keys) const
     {
       keys.clear();
-      for (size_t i = 0; i < size; ++i) {
+      for (size_t i = 0; i < table.size(); ++i) {
         if (table[i].state == OCCUPIED) {
           keys.push_back(table[i].key);
         }
       }
     }
+
     size_t getCount() const
     {
       return count;
     }
 
+    size_t getSize() const
+    {
+      return table.size();
+    }
+
     void clear()
     {
-      delete[] table;
-      table = new Entry[size];
+      table.clear();
+      size_t size = nextPrime(DEFAULT_TABLE_SIZE);
+      for (size_t i = 0; i < size; ++i) {
+        table.push_back(Entry());
+      }
       count = 0;
     }
   };

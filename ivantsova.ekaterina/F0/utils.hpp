@@ -10,6 +10,7 @@ namespace ivantsova {
   void trim(std::string& str);
   bool isLeapYear(int year);
   int daysInMonth(int month, int year);
+
 }
 
 #endif

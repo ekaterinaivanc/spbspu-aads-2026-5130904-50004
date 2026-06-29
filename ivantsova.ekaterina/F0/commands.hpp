@@ -1,6 +1,7 @@
 #ifndef COMMANDS_HPP
 #define COMMANDS_HPP
 
+#include <stdexcept>
 #include "user.hpp"
 #include "network_manager.hpp"
 
@@ -29,8 +30,8 @@ namespace ivantsova {
     DoubleHashTable< std::string, Command > commands;
 
   public:
-    void registerCommand(const std::string& name, CommandHandler handler, int minArgs, const std::string& syntax);
-    Command* findCommand(const std::string& name);
+    void registerCommand(const std::string& name, CommandHandler handler, size_t minArgs, const std::string& syntax);
+    DoubleHashTable< std::string, Command >::iterator findCommand(const std::string& name);
     void execute(const char* input, GlobalUserRegistry& globalRegistry, NetworkManager& networkManager);
     void printHelp();
 };

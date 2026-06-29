@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include "commands.hpp"
 
 void registerAllCommands(ivantsova::CommandRegistry& registry)
@@ -67,7 +68,13 @@ int main()
     if (input[0] == '\0') {
       continue;
     }
-    registry.execute(input, globalRegistry, networkManager);
+    try {
+      registry.execute(input, globalRegistry, networkManager);
+    } catch (const std::runtime_error& e) {
+      std::cout << e.what() << "\n";
+    } catch (const std::exception& e) {
+      std::cout << "ERROR: " << e.what() << "\n";
+    }
   }
   return 0;
 }

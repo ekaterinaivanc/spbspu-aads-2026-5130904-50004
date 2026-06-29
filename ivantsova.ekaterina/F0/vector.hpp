@@ -29,6 +29,29 @@ namespace ivantsova {
     void clear();
     bool contains(const T& val) const;
     void remove(const T& val);
+
+    using iterator = T*;
+    using const_iterator = const T*;
+
+    iterator begin()
+    {
+      return data;
+    }
+
+    iterator end()
+    {
+      return data + count;
+    }
+
+    const_iterator begin() const
+    {
+      return data;
+    }
+
+    const_iterator end() const
+    {
+      return data + count;
+    }
   };
 }
 
@@ -135,6 +158,9 @@ bool ivantsova::MyVector< T >::empty() const
 template< class T >
 void ivantsova::MyVector< T >::clear()
 {
+  delete[] data;
+  data = nullptr;
+  capacity = 0;
   count = 0;
 }
 

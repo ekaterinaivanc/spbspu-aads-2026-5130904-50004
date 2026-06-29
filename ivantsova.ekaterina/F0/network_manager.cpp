@@ -2,7 +2,7 @@
 
 bool ivantsova::NetworkManager::addNetwork(const std::string& name)
 {
-  if (networks.find(name) != nullptr) {
+  if (networks.findExists(name)) {
     return false;
   }
   SocialNetwork net(name);
@@ -16,12 +16,13 @@ bool ivantsova::NetworkManager::removeNetwork(const std::string& name)
 
 ivantsova::SocialNetwork* ivantsova::NetworkManager::getNetwork(const std::string& name)
 {
-  return networks.find(name);
+  auto it = networks.find(name);
+  return (it != networks.end()) ? &it->value : nullptr;
 }
 
 bool ivantsova::NetworkManager::networkExists(const std::string& name) const
 {
-  return const_cast< NetworkManager* >(this)->networks.find(name) != nullptr;
+  return networks.find(name) != networks.end();
 }
 
 void ivantsova::NetworkManager::getAllNetworkNames(ivantsova::MyVector< std::string >& names)

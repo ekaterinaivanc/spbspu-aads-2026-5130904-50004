@@ -1,3 +1,4 @@
+#include <iostream>
 #include "user.hpp"
 
 ivantsova::User::User() {}
@@ -16,9 +17,16 @@ bool ivantsova::User::operator==(const User& other) const
   return id == other.id;
 }
 
+std::ostream& ivantsova::operator<<(std::ostream& os, const ivantsova::User& user)
+{
+  os << user.id << " | " << user.lastName << " " << user.firstName
+    << " | " << user.city << " | " << user.birthday;
+  return os;
+}
+
 bool ivantsova::GlobalUserRegistry::registerUser(const User& user)
 {
-  if (users.find(user.id) != nullptr) {
+  if (users.findExists(user.id)) {
     return false;
   }
   return users.insert(user.id, user);
@@ -31,10 +39,11 @@ bool ivantsova::GlobalUserRegistry::unregisterUser(const std::string& id)
 
 ivantsova::User* ivantsova::GlobalUserRegistry::findUser(const std::string& id)
 {
-  return users.find(id);
+  auto it = users.find(id);
+  return (it != users.end()) ? &it->value : nullptr;
 }
 
 bool ivantsova::GlobalUserRegistry::userExists(const std::string& id) const
 {
-  return const_cast< GlobalUserRegistry* >(this)->users.find(id) != nullptr;
+  return users.findExists(id);
 }
